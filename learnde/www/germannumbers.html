@@ -1,0 +1,325 @@
+{% extends "templates/web.html" %}
+
+{% block title %}German Numbers & Alphabets{% endblock %}
+
+{% block page_content %}
+<div class="container mt-5" style="max-width: 500px">
+  <!-- Header -->
+  <div class="text-center mb-3">
+    <h3 class="mb-1">German Numbers & Alphabets 🎧</h3>
+    <p id="hint" class="text-muted">Tap anywhere to start</p>
+  </div>
+
+  <!-- Mode Toggle -->
+  <div class="btn-group btn-group-sm w-100 mb-3" role="group">
+    <button type="button" class="btn btn-primary" id="btn-numbers" onclick="setMode('numbers')">Numbers</button>
+    <button type="button" class="btn btn-default" id="btn-alphabets" onclick="setMode('alphabets')">Alphabets</button>
+    <button type="button" class="btn btn-default" id="btn-browse" onclick="setMode('browse')">Browse A-Z</button>
+  </div>
+
+  <!-- Quiz Card -->
+  <div class="bg-white p-4 rounded shadow-sm" id="quiz-card">
+    <!-- Stats -->
+    <div class="d-flex justify-content-between mb-3">
+      <div>Score: <strong id="score">0/0</strong></div>
+      <div>Streak: <strong id="streak">0</strong></div>
+      <div>Best: <strong id="best">0</strong></div>
+    </div>
+
+    <!-- Input -->
+    <div class="form-group">
+      <input
+        id="answer"
+        type="text"
+        class="form-control form-control-lg text-center"
+        placeholder="Type number..."
+        autocapitalize="none"
+        autofocus
+      />
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="text-center mb-3" style="min-height: 24px"></div>
+
+    <!-- Buttons -->
+    <button class="btn btn-default btn-block mb-2" onclick="playAudio()">
+      🔁 Replay
+    </button>
+
+    <button class="btn btn-primary btn-block mb-2" onclick="submitAnswer()">
+      ✅ Submit
+    </button>
+
+    <!-- Range (numbers mode only) -->
+    <div class="mt-3" id="range-section">
+      <label class="text-muted small">Range</label>
+      <div class="d-flex">
+        <input id="min" type="number" value="1" min="0" max="999999" class="form-control mr-2" />
+        <input id="max" type="number" value="100" min="0" max="999999" class="form-control ml-2" />
+      </div>
+
+      <button class="btn btn-default btn-block mt-2" onclick="applyRange()">
+        Apply Range
+      </button>
+    </div>
+  </div>
+
+  <!-- Browse Card -->
+  <div class="bg-white p-4 rounded shadow-sm" id="browse-card" style="display:none">
+    <p class="text-muted small text-center mb-3">Tap a letter to hear its pronunciation</p>
+    <div id="alphabet-grid" style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const AUDIO_BASE = '/assets/learnde/audio/';
+  const MAX_NUMBER = 999999; // largest number numberToGerman() supports
+
+  const correctSound = new Audio(
+    "https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg",
+  );
+  const wrongSound = new Audio(
+    "https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg",
+  );
+
+  const germanAlphabet = [
+    'a','b','c','d','e','f','g','h','i','j','k','l','m',
+    'n','o','p','q','r','s','t','u','v','w','x','y','z',
+    'ä','ö','ü','ß'
+  ];
+
+  let mode = 'numbers';
+  let currentNumber = 0;
+  let currentLetter = '';
+  let currentText = '';
+  let streak = 0;
+  let best = 0;
+  let min = 1;
+  let max = 100;
+  let started = false;
+  let correct = 0;
+  let total = 0;
+
+  // Map letter → audio filename
+  const letterAudio = {
+    'a':'a','b':'b','c':'c','d':'d','e':'e','f':'f','g':'g','h':'h',
+    'i':'i','j':'j','k':'k','l':'l','m':'m','n':'n','o':'o','p':'p',
+    'q':'q','r':'r','s':'s','t':'t','u':'u','v':'v','w':'w','x':'x',
+    'y':'y','z':'z','ä':'ae','ö':'oe','ü':'ue','ß':'ss'
+  };
+
+  // Build browse grid
+  (function buildGrid() {
+    const grid = document.getElementById("alphabet-grid");
+    germanAlphabet.forEach(function(letter) {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-default";
+      btn.style.cssText = "font-size:1.4rem; padding:12px 0; font-weight:600;";
+      btn.textContent = letter;
+      btn.onclick = function() { speakLetter(letter); };
+      grid.appendChild(btn);
+    });
+  })();
+
+  function speakLetter(letter) {
+    const file = letterAudio[letter];
+    if (file) {
+      const audio = new Audio(AUDIO_BASE + file + '.mp3');
+      audio.play();
+    }
+  }
+
+  // German number converter
+  function numberToGerman(n) {
+    const ones = [
+      "null","eins","zwei","drei","vier","fünf","sechs","sieben","acht","neun",
+    ];
+    const teens = [
+      "zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn",
+      "sechzehn","siebzehn","achtzehn","neunzehn",
+    ];
+    const tens = [
+      "","","zwanzig","dreißig","vierzig","fünfzig","sechzig","siebzig","achtzig","neunzig",
+    ];
+
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+
+    if (n < 100) {
+      let t = Math.floor(n / 10);
+      let o = n % 10;
+      let one = o === 1 ? "ein" : ones[o];
+      return o === 0 ? tens[t] : one + "und" + tens[t];
+    }
+
+    if (n < 1000) {
+      let h = Math.floor(n / 100);
+      let rest = n % 100;
+      let prefix = (h === 1 ? "ein" : ones[h]) + "hundert";
+      return rest === 0 ? prefix : prefix + numberToGerman(rest);
+    }
+
+    if (n < 1000000) {
+      let th = Math.floor(n / 1000);
+      let rest = n % 1000;
+      // "eins" becomes "ein" before "tausend" (einundzwanzigtausend, hunderteintausend)
+      let prefix = numberToGerman(th).replace(/eins$/, "ein") + "tausend";
+      return rest === 0 ? prefix : prefix + numberToGerman(rest);
+    }
+  }
+
+  // Play audio
+  function playAudio() {
+    if (mode === 'alphabets' && letterAudio[currentLetter]) {
+      const audio = new Audio(AUDIO_BASE + letterAudio[currentLetter] + '.mp3');
+      audio.play();
+      audio.onended = () => document.getElementById("answer").focus();
+    } else {
+      const utterance = new SpeechSynthesisUtterance(currentText);
+      utterance.lang = "de-DE";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+      setTimeout(() => document.getElementById("answer").focus(), 100);
+    }
+  }
+
+  // Next question (numbers or alphabets)
+  function nextQuestion() {
+    if (mode === 'numbers') {
+      currentNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+      currentText = numberToGerman(currentNumber);
+    } else {
+      currentLetter = germanAlphabet[Math.floor(Math.random() * germanAlphabet.length)];
+      currentText = currentLetter;
+    }
+
+    document.getElementById("answer").value = "";
+    document.getElementById("result").innerText = "";
+
+    playAudio();
+  }
+
+  // Switch mode
+  function setMode(m) {
+    mode = m;
+
+    document.getElementById("hint").style.display = "none";
+    started = true;
+
+    const quizCard = document.getElementById("quiz-card");
+    const browseCard = document.getElementById("browse-card");
+
+    document.getElementById("btn-numbers").className = "btn btn-default";
+    document.getElementById("btn-alphabets").className = "btn btn-default";
+    document.getElementById("btn-browse").className = "btn btn-default";
+    document.getElementById("btn-" + m).className = "btn btn-primary";
+
+    if (m === 'browse') {
+      quizCard.style.display = "none";
+      browseCard.style.display = "";
+      return;
+    }
+
+    quizCard.style.display = "";
+    browseCard.style.display = "none";
+
+    correct = 0;
+    total = 0;
+    streak = 0;
+    document.getElementById("score").innerText = "0/0";
+    document.getElementById("streak").innerText = "0";
+
+    const answerEl = document.getElementById("answer");
+    const rangeSection = document.getElementById("range-section");
+
+    if (m === 'numbers') {
+      answerEl.placeholder = "Type number...";
+      rangeSection.style.display = "";
+    } else {
+      answerEl.placeholder = "Type letter...";
+      rangeSection.style.display = "none";
+    }
+
+    nextQuestion();
+  }
+
+  // Apply range
+  function applyRange() {
+    correct = 0;
+    total = 0;
+    document.getElementById("score").innerText = "0/0";
+
+    const minInput = parseInt(document.getElementById("min").value);
+    const maxInput = parseInt(document.getElementById("max").value);
+
+    if (isNaN(minInput) || isNaN(maxInput) || minInput < 0 || maxInput > MAX_NUMBER || minInput >= maxInput) {
+      frappe.msgprint(`Invalid range. Use numbers from 0 to ${MAX_NUMBER}, with min below max.`);
+      return;
+    }
+
+    min = minInput;
+    max = maxInput;
+    streak = 0;
+
+    document.getElementById("streak").innerText = streak;
+    nextQuestion();
+  }
+
+  // Start on first interaction
+  function startOnFirstInteraction() {
+    if (!started) {
+      started = true;
+      document.getElementById("hint").style.display = "none";
+      nextQuestion();
+    }
+  }
+
+  function submitAnswer() {
+    const value = document.getElementById("answer").value.trim();
+    if (!value) return;
+
+    total++;
+
+    let isCorrect = false;
+    if (mode === 'numbers') {
+      isCorrect = parseInt(value) === currentNumber;
+    } else {
+      isCorrect = value.toLowerCase() === currentLetter;
+    }
+
+    if (isCorrect) {
+      correct++;
+      streak++;
+      if (streak > best) best = streak;
+
+      document.getElementById("result").innerText = "✅ Correct";
+      correctSound.play();
+
+      document.getElementById("streak").innerText = streak;
+      document.getElementById("best").innerText = best;
+
+      setTimeout(nextQuestion, 1000);
+    } else {
+      const hint = mode === 'numbers' ? currentNumber : currentLetter;
+      document.getElementById("result").innerText = "❌ Wrong (" + hint + ")";
+
+      wrongSound.play();
+
+      streak = 0;
+      document.getElementById("streak").innerText = streak;
+    }
+
+    document.getElementById("score").innerText = correct + "/" + total;
+  }
+
+  document.getElementById("answer").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") submitAnswer();
+  });
+
+  document.addEventListener("click", startOnFirstInteraction);
+  document.addEventListener("keydown", startOnFirstInteraction);
+</script>
+{% endblock %}
