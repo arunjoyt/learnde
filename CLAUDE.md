@@ -10,6 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 use frappe-app-dev skill
 
+## Git
+
+Do not commit or push without checking with the user first.
+
 ## Common bench commands
 
 All `bench` commands must be run from the bench root (e.g. `~/frappe-bench`), not from inside this app directory.
