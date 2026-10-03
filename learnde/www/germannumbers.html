@@ -7,7 +7,6 @@
   <!-- Header -->
   <div class="text-center mb-3">
     <h3 class="mb-1">German Numbers & Alphabets 🎧</h3>
-    <p id="hint" class="text-muted">Tap anywhere to start</p>
   </div>
 
   <!-- Mode Toggle -->
@@ -19,6 +18,8 @@
 
   <!-- Quiz Card -->
   <div class="bg-white p-4 rounded shadow-sm" id="quiz-card">
+    <p class="text-muted small text-center mb-3">Press Play Audio, listen, then type the number or letter you hear and press Submit.</p>
+
     <!-- Stats -->
     <div class="d-flex justify-content-between mb-3">
       <div>Score: <strong id="score">0/0</strong></div>
@@ -43,7 +44,7 @@
 
     <!-- Buttons -->
     <button class="btn btn-default btn-block mb-2" onclick="playAudio()">
-      🔁 Replay
+      🔊 Play Audio
     </button>
 
     <button class="btn btn-primary btn-block mb-2" onclick="submitAnswer()">
@@ -99,7 +100,6 @@
   let best = 0;
   let min = 1;
   let max = 100;
-  let started = false;
   let correct = 0;
   let total = 0;
 
@@ -188,6 +188,12 @@
 
   // Next question (numbers or alphabets)
   function nextQuestion() {
+    pickQuestion();
+    playAudio();
+  }
+
+  // Pick a new question without playing it
+  function pickQuestion() {
     if (mode === 'numbers') {
       currentNumber = Math.floor(Math.random() * (max - min + 1)) + min;
       currentText = numberToGerman(currentNumber);
@@ -198,16 +204,11 @@
 
     document.getElementById("answer").value = "";
     document.getElementById("result").innerText = "";
-
-    playAudio();
   }
 
   // Switch mode
   function setMode(m) {
     mode = m;
-
-    document.getElementById("hint").style.display = "none";
-    started = true;
 
     const quizCard = document.getElementById("quiz-card");
     const browseCard = document.getElementById("browse-card");
@@ -243,7 +244,7 @@
       rangeSection.style.display = "none";
     }
 
-    nextQuestion();
+    pickQuestion();
   }
 
   // Apply range
@@ -265,16 +266,7 @@
     streak = 0;
 
     document.getElementById("streak").innerText = streak;
-    nextQuestion();
-  }
-
-  // Start on first interaction
-  function startOnFirstInteraction() {
-    if (!started) {
-      started = true;
-      document.getElementById("hint").style.display = "none";
-      nextQuestion();
-    }
+    pickQuestion();
   }
 
   function submitAnswer() {
@@ -319,7 +311,7 @@
     if (e.key === "Enter") submitAnswer();
   });
 
-  document.addEventListener("click", startOnFirstInteraction);
-  document.addEventListener("keydown", startOnFirstInteraction);
+  // Browsers block audio until the user interacts, so the first question waits for Play Audio
+  pickQuestion();
 </script>
 {% endblock %}
