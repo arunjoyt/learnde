@@ -2,15 +2,15 @@
 
 A [Frappe](https://frappeframework.com/) app for practising German.
 
-## German Numbers & Alphabets
+## German Numbers & Letters
 
 Open `http://<your-site>/germannumbers`. The page has three modes:
 
 - **Numbers**: The browser speaks a random German number. Type the number you hear. Set the minimum and maximum to change the range (default 1–100).
-- **Alphabets**: The page plays a recorded German letter, including ä, ö, ü and ß. Type the letter you hear.
+- **Letters**: The page plays a recorded German letter, including ä, ö, ü and ß. Type the letter you hear.
 - **Browse A-Z**: Click a letter to hear how it sounds.
 
-Use the replay button to hear the audio again. Press Enter to submit an answer.
+Press Play Audio to hear the number or letter. Press it again to replay. Press Enter to submit an answer.
 
 ## Installation
 

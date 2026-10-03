@@ -1,18 +1,18 @@
 {% extends "templates/web.html" %}
 
-{% block title %}German Numbers & Alphabets{% endblock %}
+{% block title %}German Numbers & Letters{% endblock %}
 
 {% block page_content %}
 <div class="container mt-5" style="max-width: 500px">
   <!-- Header -->
   <div class="text-center mb-3">
-    <h3 class="mb-1">German Numbers & Alphabets 🎧</h3>
+    <h3 class="mb-1">German Numbers & Letters 🎧</h3>
   </div>
 
   <!-- Mode Toggle -->
   <div class="btn-group btn-group-sm w-100 mb-3" role="group">
     <button type="button" class="btn btn-primary" id="btn-numbers" onclick="setMode('numbers')">Numbers</button>
-    <button type="button" class="btn btn-default" id="btn-alphabets" onclick="setMode('alphabets')">Alphabets</button>
+    <button type="button" class="btn btn-default" id="btn-alphabets" onclick="setMode('alphabets')">Letters</button>
     <button type="button" class="btn btn-default" id="btn-browse" onclick="setMode('browse')">Browse A-Z</button>
   </div>
 
