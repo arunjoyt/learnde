@@ -14,12 +14,52 @@
 			--fc-accent: #2563eb;
 			--fc-card: #f8fafc;
 			--fc-border: #e5e7eb;
+			--fc-back-bg: #eff6ff;
+			--fc-back-border: #bfdbfe;
+			--fc-error: #dc2626;
 			max-width: 560px;
 			margin: 24px auto;
 			padding: 0 16px;
 			font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 			color: var(--fc-fg);
 			text-align: center;
+		}
+		html.fc-dark,
+		html.fc-dark body {
+			background: #0f172a;
+			color: #e5e7eb;
+			color-scheme: dark;
+		}
+		/* Frappe website navbar and footer */
+		html.fc-dark .navbar,
+		html.fc-dark .web-footer,
+		html.fc-dark .dropdown-menu {
+			background: #0f172a !important;
+			border-color: #1e293b !important;
+		}
+		html.fc-dark .navbar a,
+		html.fc-dark .navbar .navbar-brand,
+		html.fc-dark .web-footer,
+		html.fc-dark .web-footer a,
+		html.fc-dark .dropdown-menu a {
+			color: #cbd5e1 !important;
+		}
+		html.fc-dark .dropdown-menu a:hover {
+			background: #1e293b !important;
+		}
+		html.fc-dark .navbar-toggler-icon {
+			filter: invert(1);
+		}
+		html.fc-dark #fc-app {
+			--fc-bg: #1e293b;
+			--fc-fg: #e5e7eb;
+			--fc-muted: #94a3b8;
+			--fc-accent: #3b82f6;
+			--fc-card: #1e293b;
+			--fc-border: #334155;
+			--fc-back-bg: #172554;
+			--fc-back-border: #1e40af;
+			--fc-error: #f87171;
 		}
 		#fc-app .fc-top {
 			display: flex;
@@ -28,9 +68,20 @@
 			margin-bottom: 12px;
 			color: var(--fc-muted);
 			font-size: 14px;
+			gap: 8px;
+		}
+		#fc-app .fc-top-right {
+			display: flex;
+			gap: 8px;
+			min-width: 0;
+		}
+		#fc-app #fc-count,
+		#fc-app #fc-theme {
+			flex-shrink: 0;
+			white-space: nowrap;
 		}
 		#fc-app #fc-dir {
-			max-width: 60%;
+			min-width: 0;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -51,8 +102,8 @@
 			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 		}
 		#fc-app .fc-card.fc-back {
-			background: #eff6ff;
-			border-color: #bfdbfe;
+			background: var(--fc-back-bg);
+			border-color: var(--fc-back-border);
 		}
 		#fc-app .fc-label {
 			position: absolute;
@@ -116,6 +167,13 @@
 			#fc-app .fc-text {
 				font-size: 28px;
 			}
+			#fc-app .fc-top button {
+				padding: 8px 10px;
+				font-size: 14px;
+			}
+			#fc-app .fc-theme-text {
+				display: none;
+			}
 		}
 		#fc-app .fc-settings {
 			margin-top: 24px;
@@ -142,10 +200,12 @@
 			font-size: 14px;
 			border: 1px solid var(--fc-border);
 			border-radius: 8px;
+			background: var(--fc-bg);
+			color: var(--fc-fg);
 		}
 		#fc-app .fc-settings-error {
 			margin-top: 8px;
-			color: #dc2626;
+			color: var(--fc-error);
 			font-size: 13px;
 		}
 		#fc-app .fc-settings-error:empty {
@@ -160,7 +220,10 @@
 
 	<div class="fc-top">
 		<span id="fc-count"></span>
-		<button id="fc-dir" type="button"></button>
+		<span class="fc-top-right">
+			<button id="fc-dir" type="button"></button>
+			<button id="fc-theme" type="button" title="Theme"></button>
+		</span>
 	</div>
 
 	<div id="fc-body"><div class="fc-msg">Loading cards&hellip;</div></div>
@@ -191,6 +254,10 @@
 			var DEFAULT_URL =
 				"https://docs.google.com/spreadsheets/d/1PAR2CWXiN2aFeoJqJ9Eos3DwkoDvdqs83wTb8Ry3e3c/edit?usp=sharing";
 			var STORAGE_KEY = "learnde-flashcards-sheet";
+			var THEME_KEY = "learnde-flashcards-theme";
+			var THEMES = ["auto", "light", "dark"];
+			var THEME_ICONS = { auto: "\u25D0", light: "\u2600", dark: "\u263E" };
+			var THEME_NAMES = { auto: "Auto", light: "Light", dark: "Dark" };
 
 			var cards = [];
 			var index = 0;
@@ -367,6 +434,32 @@
 				$("fc-url").value = DEFAULT_URL;
 				load(DEFAULT_URL);
 			};
+
+			var systemDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+			var theme = "auto";
+			try {
+				theme = localStorage.getItem(THEME_KEY) || "auto";
+			} catch (e) {}
+			if (THEMES.indexOf(theme) < 0) theme = "auto";
+
+			function applyTheme() {
+				var dark = theme === "dark" || (theme === "auto" && systemDark && systemDark.matches);
+				document.documentElement.classList.toggle("fc-dark", !!dark);
+				$("fc-theme").innerHTML =
+					THEME_ICONS[theme] + '<span class="fc-theme-text"> ' + THEME_NAMES[theme] + "</span>";
+				$("fc-theme").title = "Theme: " + THEME_NAMES[theme];
+			}
+
+			$("fc-theme").onclick = function () {
+				theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+				try {
+					if (theme === "auto") localStorage.removeItem(THEME_KEY);
+					else localStorage.setItem(THEME_KEY, theme);
+				} catch (e) {}
+				applyTheme();
+			};
+			if (systemDark && systemDark.addEventListener) systemDark.addEventListener("change", applyTheme);
+			applyTheme();
 
 			var initial = getSaved() || DEFAULT_URL;
 			$("fc-url").value = initial;
