@@ -86,6 +86,50 @@
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
+		#fc-app .fc-search {
+			width: 100%;
+			box-sizing: border-box;
+			margin-bottom: 12px;
+			padding: 10px 12px;
+			font-size: 16px;
+			border: 1px solid var(--fc-border);
+			border-radius: 8px;
+			background: var(--fc-bg);
+			color: var(--fc-fg);
+		}
+		#fc-app .fc-results {
+			text-align: left;
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+			overflow: hidden;
+		}
+		#fc-app .fc-results-head,
+		#fc-app button.fc-result {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			padding: 10px 14px;
+		}
+		#fc-app .fc-results-head {
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			color: var(--fc-muted);
+			background: var(--fc-card);
+		}
+		#fc-app button.fc-result {
+			width: 100%;
+			text-align: left;
+			font-size: 16px;
+			word-break: break-word;
+			border: 0;
+			border-top: 1px solid var(--fc-border);
+			border-radius: 0;
+			background: var(--fc-bg);
+		}
+		#fc-app button.fc-result:hover {
+			background: var(--fc-back-bg);
+		}
 		#fc-app .fc-card {
 			position: relative;
 			min-height: 240px;
@@ -149,6 +193,16 @@
 		#fc-app button:disabled {
 			opacity: 0.5;
 			cursor: default;
+		}
+		#fc-app .fc-open {
+			display: inline-block;
+			margin-top: 16px;
+			font-size: 14px;
+			color: var(--fc-accent);
+			text-decoration: none;
+		}
+		#fc-app .fc-open:hover {
+			text-decoration: underline;
 		}
 		#fc-app .fc-msg {
 			padding: 40px 0;
@@ -226,14 +280,18 @@
 		</span>
 	</div>
 
+	<input id="fc-search" class="fc-search" type="search" placeholder="Search cards&hellip;" autocomplete="off" />
+
 	<div id="fc-body"><div class="fc-msg">Loading cards&hellip;</div></div>
 
-	<div class="fc-controls">
+	<div class="fc-controls" id="fc-controls">
 		<button id="fc-prev" type="button">&larr; Prev</button>
 		<button id="fc-flip" type="button" class="fc-primary">Flip</button>
 		<button id="fc-next" type="button">Next &rarr;</button>
 		<button id="fc-shuffle" type="button">Shuffle</button>
 	</div>
+
+	<a id="fc-open" class="fc-open" target="_blank" rel="noopener">Open in Google Sheets &#8599;</a>
 
 	<details class="fc-settings" id="fc-settings">
 		<summary>Google Sheet</summary>
@@ -323,11 +381,47 @@
 				return d.innerHTML;
 			}
 
+			// Lowercase and drop accents, so "uber" finds "über" and "strasse" finds "Straße".
+			function normalize(s) {
+				return s
+					.toLowerCase()
+					.replace(/ß/g, "ss")
+					.normalize("NFD")
+					.replace(/[̀-ͯ]/g, "");
+			}
+
+			function renderResults(query) {
+				var matches = [];
+				cards.forEach(function (card, i) {
+					if (normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(i);
+				});
+				$("fc-count").textContent = matches.length + (matches.length === 1 ? " match" : " matches");
+				if (!matches.length) {
+					$("fc-body").innerHTML = '<div class="fc-msg">No cards match.</div>';
+					return;
+				}
+				$("fc-body").innerHTML =
+					'<div class="fc-results"><div class="fc-results-head">' +
+					"<span>" + escapeHTML(labels[0]) + "</span><span>" + escapeHTML(labels[1]) + "</span></div>" +
+					matches
+						.map(function (i) {
+							return (
+								'<button type="button" class="fc-result" data-i="' + i + '">' +
+								"<span>" + escapeHTML(cards[i][0]) + "</span><span>" + escapeHTML(cards[i][1]) + "</span>" +
+								"</button>"
+							);
+						})
+						.join("") +
+					"</div>";
+			}
+
 			function render() {
 				var empty = !cards.length;
+				var query = normalize($("fc-search").value.trim());
 				["fc-prev", "fc-flip", "fc-next", "fc-shuffle"].forEach(function (id) {
 					$(id).disabled = empty;
 				});
+				$("fc-controls").style.display = query && !empty ? "none" : "";
 				$("fc-dir").textContent = empty
 					? ""
 					: reversed
@@ -337,6 +431,10 @@
 				if (empty) {
 					$("fc-count").textContent = "";
 					$("fc-body").innerHTML = '<div class="fc-msg">No cards found in the sheet.</div>';
+					return;
+				}
+				if (query) {
+					renderResults(query);
 					return;
 				}
 				var card = cards[index];
@@ -381,9 +479,30 @@
 				render();
 			};
 
+			$("fc-search").oninput = render;
+			$("fc-search").onkeydown = function (e) {
+				if (e.key === "Escape") {
+					this.value = "";
+					this.blur();
+					render();
+				}
+			};
+			// Clicking a search result opens that card.
+			$("fc-body").addEventListener("click", function (e) {
+				var result = e.target.closest(".fc-result");
+				if (!result) return;
+				index = Number(result.dataset.i);
+				flipped = false;
+				$("fc-search").value = "";
+				render();
+			});
+
 			document.addEventListener("keydown", function (e) {
 				if (!cards.length || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-				if (e.key === "ArrowRight") go(1);
+				if (e.key === "/") {
+					e.preventDefault();
+					$("fc-search").focus();
+				} else if (e.key === "ArrowRight") go(1);
 				else if (e.key === "ArrowLeft") go(-1);
 				else if (e.key === " " || e.key === "Enter") {
 					e.preventDefault();
@@ -391,16 +510,32 @@
 				}
 			});
 
-			// Turn any Google Sheets link (edit/share URL) into its CSV export URL.
-			function toCsvUrl(link) {
+			function parseSheetLink(link) {
 				var id = (link.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/) || [])[1];
 				if (!id) return null;
-				var gid = (link.match(/[#&?]gid=(\d+)/) || [])[1];
+				return { id: id, gid: (link.match(/[#&?]gid=(\d+)/) || [])[1] };
+			}
+
+			// Turn any Google Sheets link (edit/share URL) into its CSV export URL.
+			function toCsvUrl(link) {
+				var sheet = parseSheetLink(link);
+				if (!sheet) return null;
 				return (
 					"https://docs.google.com/spreadsheets/d/" +
-					id +
+					sheet.id +
 					"/gviz/tq?tqx=out:csv" +
-					(gid ? "&gid=" + gid : "")
+					(sheet.gid ? "&gid=" + sheet.gid : "")
+				);
+			}
+
+			// Editor URL for the same sheet and tab.
+			function toEditUrl(link) {
+				var sheet = parseSheetLink(link);
+				return (
+					"https://docs.google.com/spreadsheets/d/" +
+					sheet.id +
+					"/edit" +
+					(sheet.gid ? "#gid=" + sheet.gid : "")
 				);
 			}
 
@@ -475,6 +610,7 @@
 				});
 				$("fc-count").textContent = "";
 				$("fc-body").innerHTML = '<div class="fc-msg">Loading cards\u2026</div>';
+				$("fc-open").href = toEditUrl(link);
 
 				fetch(toCsvUrl(link))
 					.then(function (r) {
