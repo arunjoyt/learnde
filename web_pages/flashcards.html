@@ -76,6 +76,7 @@
 			min-width: 0;
 		}
 		#fc-app #fc-count,
+		#fc-app #fc-list,
 		#fc-app #fc-theme {
 			flex-shrink: 0;
 			white-space: nowrap;
@@ -196,7 +197,7 @@
 		}
 		#fc-app .fc-open {
 			display: inline-block;
-			margin-top: 16px;
+			margin-top: 8px;
 			font-size: 14px;
 			color: var(--fc-accent);
 			text-decoration: none;
@@ -225,7 +226,7 @@
 				padding: 8px 10px;
 				font-size: 14px;
 			}
-			#fc-app .fc-theme-text {
+			#fc-app .fc-btn-text {
 				display: none;
 			}
 		}
@@ -276,6 +277,7 @@
 		<span id="fc-count"></span>
 		<span class="fc-top-right">
 			<button id="fc-dir" type="button"></button>
+			<button id="fc-list" type="button"></button>
 			<button id="fc-theme" type="button" title="Theme"></button>
 		</span>
 	</div>
@@ -291,16 +293,16 @@
 		<button id="fc-shuffle" type="button">Shuffle</button>
 	</div>
 
-	<a id="fc-open" class="fc-open" target="_blank" rel="noopener">Open in Google Sheets &#8599;</a>
-
 	<details class="fc-settings" id="fc-settings">
 		<summary>Google Sheet</summary>
 		<div class="fc-settings-row">
 			<input id="fc-url" type="url" placeholder="https://docs.google.com/spreadsheets/d/&hellip;" />
 			<button id="fc-load" type="button" class="fc-primary">Load</button>
+			<button id="fc-clear" type="button">Clear</button>
 			<button id="fc-reset" type="button">Default</button>
 		</div>
 		<div class="fc-settings-error" id="fc-url-error"></div>
+		<a id="fc-open" class="fc-open" target="_blank" rel="noopener">Open in Google Sheets &#8599;</a>
 		<div class="fc-settings-note">
 			The first two columns are the card sides; the header row gives their names. Share the sheet as "Anyone with the link can view".
 			The link is remembered in this browser.
@@ -322,6 +324,8 @@
 			var flipped = false;
 			var labels = ["", ""];
 			var reversed = false;
+			var sheetCards = []; // cards in sheet order; `cards` is the shuffled deck
+			var listView = false;
 			var loadId = 0;
 
 			var $ = function (id) {
@@ -387,15 +391,18 @@
 					.toLowerCase()
 					.replace(/ß/g, "ss")
 					.normalize("NFD")
-					.replace(/[̀-ͯ]/g, "");
+					.replace(/[\u0300-\u036f]/g, "");
 			}
 
-			function renderResults(query) {
+			// Table of cards in sheet order; an empty query lists every card.
+			function renderList(query) {
 				var matches = [];
-				cards.forEach(function (card, i) {
-					if (normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(i);
+				sheetCards.forEach(function (card) {
+					if (normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(cards.indexOf(card));
 				});
-				$("fc-count").textContent = matches.length + (matches.length === 1 ? " match" : " matches");
+				$("fc-count").textContent = query
+					? matches.length + (matches.length === 1 ? " match" : " matches")
+					: "All " + matches.length + " cards";
 				if (!matches.length) {
 					$("fc-body").innerHTML = '<div class="fc-msg">No cards match.</div>';
 					return;
@@ -421,7 +428,13 @@
 				["fc-prev", "fc-flip", "fc-next", "fc-shuffle"].forEach(function (id) {
 					$(id).disabled = empty;
 				});
-				$("fc-controls").style.display = query && !empty ? "none" : "";
+				var showList = !empty && (query || listView);
+				$("fc-controls").style.display = showList ? "none" : "";
+				$("fc-list").disabled = empty;
+				$("fc-list").innerHTML = listView
+					? '▭<span class="fc-btn-text"> Cards</span>'
+					: '☰<span class="fc-btn-text"> List</span>';
+				$("fc-list").title = listView ? "Back to cards" : "Show all cards";
 				$("fc-dir").textContent = empty
 					? ""
 					: reversed
@@ -433,8 +446,8 @@
 					$("fc-body").innerHTML = '<div class="fc-msg">No cards found in the sheet.</div>';
 					return;
 				}
-				if (query) {
-					renderResults(query);
+				if (showList) {
+					renderList(query);
 					return;
 				}
 				var card = cards[index];
@@ -479,6 +492,10 @@
 				render();
 			};
 
+			$("fc-list").onclick = function () {
+				listView = !listView;
+				render();
+			};
 			$("fc-search").oninput = render;
 			$("fc-search").onkeydown = function (e) {
 				if (e.key === "Escape") {
@@ -487,12 +504,13 @@
 					render();
 				}
 			};
-			// Clicking a search result opens that card.
+			// Clicking a row in the list opens that card.
 			$("fc-body").addEventListener("click", function (e) {
 				var result = e.target.closest(".fc-result");
 				if (!result) return;
 				index = Number(result.dataset.i);
 				flipped = false;
+				listView = false;
 				$("fc-search").value = "";
 				render();
 			});
@@ -502,6 +520,12 @@
 				if (e.key === "/") {
 					e.preventDefault();
 					$("fc-search").focus();
+				} else if (listView || $("fc-search").value.trim()) {
+					if (e.key === "Escape") {
+						listView = false;
+						$("fc-search").value = "";
+						render();
+					}
 				} else if (e.key === "ArrowRight") go(1);
 				else if (e.key === "ArrowLeft") go(-1);
 				else if (e.key === " " || e.key === "Enter") {
@@ -563,6 +587,11 @@
 				$("fc-url-error").textContent = "";
 				load(link);
 			};
+			$("fc-clear").onclick = function () {
+				$("fc-url").value = "";
+				$("fc-url-error").textContent = "";
+				$("fc-url").focus();
+			};
 			$("fc-reset").onclick = function () {
 				setSaved(null);
 				$("fc-url-error").textContent = "";
@@ -581,7 +610,7 @@
 				var dark = theme === "dark" || (theme === "auto" && systemDark && systemDark.matches);
 				document.documentElement.classList.toggle("fc-dark", !!dark);
 				$("fc-theme").innerHTML =
-					THEME_ICONS[theme] + '<span class="fc-theme-text"> ' + THEME_NAMES[theme] + "</span>";
+					THEME_ICONS[theme] + '<span class="fc-btn-text"> ' + THEME_NAMES[theme] + "</span>";
 				$("fc-theme").title = "Theme: " + THEME_NAMES[theme];
 			}
 
@@ -603,9 +632,10 @@
 			function load(link) {
 				var request = ++loadId;
 				cards = [];
+				sheetCards = [];
 				index = 0;
 				flipped = false;
-				["fc-prev", "fc-flip", "fc-next", "fc-shuffle"].forEach(function (id) {
+				["fc-prev", "fc-flip", "fc-next", "fc-shuffle", "fc-list"].forEach(function (id) {
 					$(id).disabled = true;
 				});
 				$("fc-count").textContent = "";
@@ -631,6 +661,7 @@
 								return c[0] && c[1];
 							});
 						setSaved(link === DEFAULT_URL ? null : link);
+						sheetCards = cards.slice();
 						shuffle(cards);
 						render();
 					})
