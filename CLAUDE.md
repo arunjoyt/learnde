@@ -16,12 +16,20 @@ Do not commit or push without checking with the user first.
 
 ## Common bench commands
 
-All `bench` commands must be run from the bench root (e.g. `~/frappe-bench`), not from inside this app directory.
-bench is available at /Users/arunjoyt/Desktop/Work/venv/fb/bin/bench
-e.g /Users/arunjoyt/Desktop/Work/venv/fb/bin/bench --version
+### Local environment
 
-Frappe site is available at: http://127.0.0.1:8008/
-Name of the site is: learnde1.test
+Put machine-specific values in `CLAUDE.local.md` at the app root. That file is git-ignored and Claude Code loads it automatically. Example:
+
+```markdown
+## Local environment
+
+- **Bench root:** `~/frappe-bench`
+- **bench executable:** `~/venvs/frappe/bin/bench`
+- **Site name:** `mysite.localhost` (use this for `<site>` in bench commands)
+- **Site URL:** http://127.0.0.1:8000/
+```
+
+All `bench` commands must be run from the bench root, not from inside this app directory.
 
 ```bash
 # Run all tests for this app
