@@ -206,19 +206,72 @@
 		}
 		#fc-app .fc-mode {
 			display: grid;
-			grid-template-columns: repeat(4, 1fr);
+			grid-template-columns: repeat(5, 1fr);
 			gap: 8px;
 			margin-bottom: 16px;
+		}
+		#fc-app .fc-mode button {
+			padding: 12px 4px;
+			font-size: 15px;
+			white-space: nowrap;
 		}
 		@media (max-width: 480px) {
 			#fc-app .fc-mode {
 				grid-template-columns: 1fr 1fr;
 			}
+			#fc-app .fc-mode button {
+				font-size: 17px;
+			}
+			/* An odd last button takes the full row */
+			#fc-app .fc-mode button:last-child:nth-child(odd) {
+				grid-column: 1 / -1;
+			}
 		}
-		#fc-app .fc-mode button {
-			padding: 12px 4px;
-			white-space: nowrap;
+		#fc-app .fc-range {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+			margin-bottom: 16px;
+			color: var(--fc-muted);
 		}
+		#fc-app .fc-range input {
+			flex: 1 1 0;
+			min-width: 0;
+			padding: 10px 12px;
+			font-size: 17px;
+			border: 1px solid var(--fc-border);
+			border-radius: 8px;
+			background: var(--fc-bg);
+			color: var(--fc-fg);
+		}
+		#fc-app .fc-range .fc-settings-error {
+			flex-basis: 100%;
+			margin: 0;
+		}
+		#fc-app .fc-text.fc-listen {
+			font-size: 56px;
+		}
+		#fc-app .fc-size {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px 12px;
+			margin-bottom: 16px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-size-opts {
+			display: flex;
+			flex: 1 1 220px;
+			max-width: 300px;
+			gap: 8px;
+		}
+		#fc-app .fc-size-opts button {
+			flex: 1;
+			padding: 10px 4px;
+		}
+		#fc-app .fc-size-opts button.fc-on,
 		#fc-app .fc-mode button.fc-on {
 			background: var(--fc-accent);
 			border-color: var(--fc-accent);
@@ -245,6 +298,12 @@
 		}
 		#fc-app .fc-input.fc-wrong {
 			border-color: var(--fc-error);
+		}
+		#fc-app button.fc-check {
+			width: 100%;
+			min-height: 56px;
+			margin-top: 12px;
+			font-size: 18px;
 		}
 		#fc-app .fc-letters {
 			display: flex;
@@ -336,6 +395,19 @@
 			margin: 0;
 			padding: 8px 0;
 			background: var(--fc-page);
+		}
+		#fc-app .fc-q.fc-skip .fc-q-mark,
+		#fc-app .fc-sum-note {
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-sum-note {
+			margin-top: 6px;
+			font-size: 15px;
+		}
+		#fc-app .fc-score-sub {
+			margin: -8px 0 16px;
+			color: var(--fc-muted);
+			text-align: center;
 		}
 		#fc-app .fc-score {
 			margin-bottom: 16px;
@@ -603,6 +675,25 @@
 		<button type="button" data-mode="type">Type answer</button>
 		<button type="button" data-mode="quiz">Quiz</button>
 		<button type="button" data-mode="article">Articles</button>
+		<button type="button" data-mode="number">Numbers</button>
+	</div>
+
+	<div class="fc-size" id="fc-size">
+		<span id="fc-size-label"></span>
+		<span class="fc-size-opts">
+			<button type="button" data-size="5">5</button>
+			<button type="button" data-size="10">10</button>
+			<button type="button" data-size="20">20</button>
+			<button type="button" data-size="0" id="fc-size-all">All</button>
+		</span>
+	</div>
+
+	<div class="fc-range" id="fc-range">
+		<span>From</span>
+		<input id="fc-min" type="number" inputmode="numeric" min="0" max="999999" aria-label="Smallest number" />
+		<span>to</span>
+		<input id="fc-max" type="number" inputmode="numeric" min="0" max="999999" aria-label="Largest number" />
+		<div class="fc-settings-error" id="fc-range-error"></div>
 	</div>
 
 	<div id="fc-body"><div class="fc-msg">Loading cards&hellip;</div></div>
@@ -611,7 +702,7 @@
 		<button id="fc-prev" type="button">&larr; Prev</button>
 		<button id="fc-next" type="button">Next &rarr;</button>
 		<button id="fc-flip" type="button" class="fc-primary">Flip</button>
-		<button id="fc-shuffle" type="button">Shuffle</button>
+		<button id="fc-shuffle" type="button">New round</button>
 		<button id="fc-review" type="button" class="fc-wide"></button>
 	</div>
 
@@ -656,7 +747,10 @@
 			var STORAGE_KEY = "learnde-flashcards-sheet";
 			var THEME_KEY = "learnde-flashcards-theme";
 			var MODE_KEY = "learnde-flashcards-mode";
-			var QUIZ_SIZE = 10;
+			var SIZE_KEY = "learnde-flashcards-size";
+			var SIZES = [5, 10, 20, 0]; // 0 means all cards
+			var RANGE_KEY = "learnde-flashcards-range";
+			var MAX_NUMBER = 999999; // largest number numberToGerman() supports
 			var ARTICLES = ["der", "das", "die"];
 			var ARTICLE_RE = /^(der|das|die)\s+(\S.*)$/i;
 			var LETTERS = ["\u00e4", "\u00f6", "\u00fc", "\u00df"];
@@ -667,25 +761,42 @@
 			var REVIEW_KEY = "learnde-flashcards-review";
 			var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-			var cards = [];
+			var deck = []; // cards to study: the whole sheet, the marked cards, or only nouns in article mode
+			var cards = []; // cards in the current round, picked at random from `deck`
 			var index = 0;
+			var roundSize = 5;
+			var log = []; // per card in the round: { typed, result, tries, picked }
+			var finished = false; // the round is over and its summary is showing
 			var flipped = false;
 			var labels = ["", ""];
 			var reversed = false;
-			var sheetCards = []; // cards in sheet order; `cards` is the shuffled deck
+			var sheetCards = []; // cards in sheet order
 			var view = "cards"; // "cards", "list" or "calendar"
 			var reviewOnly = false; // study only the cards marked for review
 			// "flip" shows the other side, "type" checks a typed answer, "quiz" checks a set of cards at once,
-			// "article" asks for der, das or die
+			// "article" asks for der, das or die, "number" reads a number aloud to type in digits
 			var answerMode = "flip";
 			var typed = ""; // answer typed for the current card
 			var result = null; // null until checked, then "right", "wrong" or "shown" (answer revealed)
-			var quiz = null; // { cards, answers, results }; results stay null until submitted
+			var tries = 0; // answers checked for the current card
+			var quiz = null; // { answers, results } for the round; results stay null until submitted
 			var picked = null; // article chosen for the current card in article mode
 			var articleSide = 1; // column that holds the German nouns with their articles
+			var numMin = 1;
+			var numMax = 100;
+			var speakNext = false; // read the number aloud on the next render
+			try {
+				var savedRange = JSON.parse(localStorage.getItem(RANGE_KEY));
+				if (savedRange) {
+					numMin = savedRange[0];
+					numMax = savedRange[1];
+				}
+			} catch (e) {}
 			try {
 				var savedMode = localStorage.getItem(MODE_KEY);
-				if (["type", "quiz", "article"].indexOf(savedMode) >= 0) answerMode = savedMode;
+				if (["type", "quiz", "article", "number"].indexOf(savedMode) >= 0) answerMode = savedMode;
+				var savedSize = Number(localStorage.getItem(SIZE_KEY));
+				if (SIZES.indexOf(savedSize) >= 0 && localStorage.getItem(SIZE_KEY) !== null) roundSize = savedSize;
 			} catch (e) {}
 			var calMonth = firstOfMonth(new Date());
 			var loadId = 0;
@@ -797,6 +908,63 @@
 				return m ? { article: m[1].toLowerCase(), noun: m[2] } : null;
 			}
 
+			// German words for 0 to 999999.
+			function numberToGerman(n) {
+				var ones = ["null", "eins", "zwei", "drei", "vier", "f\u00fcnf", "sechs", "sieben", "acht", "neun"];
+				var teens = [
+					"zehn", "elf", "zw\u00f6lf", "dreizehn", "vierzehn",
+					"f\u00fcnfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn",
+				];
+				var tens = [
+					"", "", "zwanzig", "drei\u00dfig", "vierzig", "f\u00fcnfzig", "sechzig", "siebzig", "achtzig", "neunzig",
+				];
+				if (n < 10) return ones[n];
+				if (n < 20) return teens[n - 10];
+				if (n < 100) {
+					var o = n % 10;
+					var t = tens[Math.floor(n / 10)];
+					return o === 0 ? t : (o === 1 ? "ein" : ones[o]) + "und" + t;
+				}
+				if (n < 1000) {
+					var h = Math.floor(n / 100);
+					var hundreds = (h === 1 ? "ein" : ones[h]) + "hundert";
+					return n % 100 ? hundreds + numberToGerman(n % 100) : hundreds;
+				}
+				// "eins" becomes "ein" before "tausend" (einundzwanzigtausend, hunderteintausend)
+				var thousands = numberToGerman(Math.floor(n / 1000)).replace(/eins$/, "ein") + "tausend";
+				return n % 1000 ? thousands + numberToGerman(n % 1000) : thousands;
+			}
+
+			// A number card: [digits, German words].
+			function randomNumberCard() {
+				var n = numMin + Math.floor(Math.random() * (numMax - numMin + 1));
+				return [String(n), numberToGerman(n)];
+			}
+
+			// "right" when the digits match; spaces, dots and commas between digits are ignored.
+			function checkNumber(given, card) {
+				var digits = given.replace(/[\s.,]/g, "");
+				return /^\d+$/.test(digits) && Number(digits) === Number(card[0]) ? "right" : "wrong";
+			}
+
+			// Read the current number aloud with a German voice.
+			function speak() {
+				if (!window.speechSynthesis) return;
+				var utterance = new SpeechSynthesisUtterance(cards[index][1]);
+				utterance.lang = "de-DE";
+				var voice = speechSynthesis.getVoices().filter(function (v) {
+					return /^de/i.test(v.lang);
+				})[0];
+				if (voice) utterance.voice = voice;
+				speechSynthesis.cancel();
+				speechSynthesis.speak(utterance);
+			}
+
+			// Number mode has no "All": the numbers are random, so a round would never end.
+			function roundLength() {
+				return answerMode === "number" ? roundSize || 20 : roundSize;
+			}
+
 			// Card text as HTML; a German noun takes the colour of its article (Klett: der blue, das green, die red).
 			function cardHTML(card, side) {
 				var noun = side === articleSide ? nounOf(card) : null;
@@ -818,17 +986,48 @@
 			// Article mode keeps only the nouns.
 			function buildDeck() {
 				var keys = getReviewKeys();
-				cards = sheetCards.filter(function (card) {
+				deck = sheetCards.filter(function (card) {
 					if (answerMode === "article" && !nounOf(card)) return false;
 					return !reviewOnly || keys.indexOf(cardKey(card)) >= 0;
 				});
-				shuffle(cards);
+				newRound();
+			}
+
+			// Pick `roundSize` random cards from the deck; `first`, when given, comes first.
+			// Number mode makes up random numbers instead.
+			function newRound(first) {
+				if (answerMode === "number") {
+					cards = [];
+					for (var i = 0; i < roundLength(); i++) cards.push(randomNumberCard());
+					speakNext = true;
+				} else {
+					var pool = deck.slice();
+					shuffle(pool);
+					if (first) {
+						pool.splice(pool.indexOf(first), 1);
+						pool.unshift(first);
+					}
+					cards = roundSize ? pool.slice(0, roundSize) : pool;
+				}
 				index = 0;
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				log = [];
+				finished = false;
 				quiz = null;
+				loadCard();
+			}
+
+			function saveCard() {
+				log[index] = { typed: typed, result: result, tries: tries, picked: picked };
+			}
+
+			// Restore the current card as it was left, so going back shows the earlier answer.
+			function loadCard() {
+				var saved = log[index] || {};
+				flipped = false;
+				typed = saved.typed || "";
+				result = saved.result || null;
+				tries = saved.tries || 0;
+				picked = saved.picked || null;
 			}
 
 			// { counts: { "YYYY-MM-DD": n }, day: today's key, seen: cards counted today }
@@ -940,14 +1139,19 @@
 					$("fc-input").focus();
 					return;
 				}
-				result = checkAnswer(typed, cards[index][reversed ? 0 : 1]);
+				result =
+					answerMode === "number" ? checkNumber(typed, cards[index]) : checkAnswer(typed, cards[index][reversed ? 0 : 1]);
+				tries++;
+				saveCard();
 				render();
 				if (result === "wrong") $("fc-input").focus();
 			}
 
-			// `answer` is HTML from cardHTML().
-			function renderVerdict(answer) {
-				if (result === "right") return '<div class="fc-verdict fc-right">\u2713 Correct</div>';
+			// `answer` is HTML; `said`, for a number, is the German word added to "Correct".
+			function renderVerdict(answer, said) {
+				if (result === "right") {
+					return '<div class="fc-verdict fc-right">\u2713 Correct' + (said ? " \u00b7 " + escapeHTML(said) : "") + "</div>";
+				}
 				if (result === "shown") {
 					return '<div class="fc-verdict"><span class="fc-correct">Answer: <b>' + answer + "</b></span></div>";
 				}
@@ -964,9 +1168,8 @@
 			function renderList(query) {
 				var matches = [];
 				var keys = getReviewKeys();
-				sheetCards.forEach(function (card) {
-					var i = cards.indexOf(card);
-					if (i >= 0 && normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(i);
+				sheetCards.forEach(function (card, i) {
+					if (deck.indexOf(card) >= 0 && normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(i);
 				});
 				$("fc-count").textContent = query
 					? matches.length + (matches.length === 1 ? " match" : " matches")
@@ -983,8 +1186,8 @@
 							return (
 								'<button type="button" class="fc-result" data-i="' + i + '">' +
 								"<span>" +
-								(keys.indexOf(cardKey(cards[i])) >= 0 ? '<span class="fc-star">\u2605</span> ' : "") +
-								cardHTML(cards[i], 0) + "</span><span>" + cardHTML(cards[i], 1) + "</span>" +
+								(keys.indexOf(cardKey(sheetCards[i])) >= 0 ? '<span class="fc-star">\u2605</span> ' : "") +
+								cardHTML(sheetCards[i], 0) + "</span><span>" + cardHTML(sheetCards[i], 1) + "</span>" +
 								"</button>"
 							);
 						})
@@ -1002,17 +1205,34 @@
 				var showList = !empty && !showCal && (query || view === "list");
 				$("fc-controls").style.display = showList || showCal ? "none" : "";
 				$("fc-mode").style.display = showList || showCal || !sheetCards.length ? "none" : "";
+				$("fc-size").style.display = $("fc-mode").style.display;
+				$("fc-size-label").textContent =
+					answerMode === "quiz" ? "Questions" : answerMode === "number" ? "Numbers per round" : "Cards per round";
+				Array.prototype.forEach.call(document.querySelectorAll("#fc-size button"), function (b) {
+					b.classList.toggle("fc-on", Number(b.dataset.size) === roundLength());
+				});
+				var numbers = answerMode === "number";
+				$("fc-size-all").style.display = numbers ? "none" : "";
+				$("fc-range").style.display = numbers && $("fc-mode").style.display !== "none" ? "" : "none";
 				var typedModes = answerMode === "type" || answerMode === "quiz";
 				$("fc-rules").style.display = showList || showCal || empty || !typedModes ? "none" : "";
-				// In a quiz only the review toggle applies.
+				// In a quiz and on a summary only the review toggle applies.
 				["fc-prev", "fc-next", "fc-flip", "fc-shuffle"].forEach(function (id) {
-					$(id).style.display = answerMode === "quiz" ? "none" : "";
+					$(id).style.display = answerMode === "quiz" || finished ? "none" : "";
 				});
+				// Typed answers have their own button under the input; in article mode it would repeat Next.
+				var ownButton = ["type", "number", "article"].indexOf(answerMode) >= 0;
+				if (ownButton) $("fc-flip").style.display = "none";
+				$("fc-shuffle").classList.toggle("fc-wide", ownButton);
+				var last = index === cards.length - 1;
+				$("fc-prev").disabled = empty || index === 0;
+				$("fc-next").innerHTML = last ? "Finish" : "Next &rarr;";
 				Array.prototype.forEach.call($("fc-mode").children, function (b) {
 					b.classList.toggle("fc-on", b.dataset.mode === answerMode);
 				});
+				var moveOn = last ? "Finish" : "Next card";
 				$("fc-flip").textContent =
-					answerMode === "flip" ? "Flip" : answerMode === "article" || answered() ? "Next card" : "Check";
+					answerMode === "flip" ? "Flip" : answerMode === "article" || answered() ? moveOn : "Check";
 				$("fc-list").disabled = empty;
 				var reviewCount = getReviewKeys().filter(function (key) {
 					return sheetCards.some(function (card) {
@@ -1020,6 +1240,7 @@
 					});
 				}).length;
 				$("fc-review").disabled = !sheetCards.length;
+				$("fc-review").style.display = numbers ? "none" : "";
 				$("fc-review").classList.toggle("fc-active", reviewOnly);
 				$("fc-review").textContent = reviewOnly
 					? "Study all cards"
@@ -1034,7 +1255,7 @@
 				$("fc-dir").textContent =
 					"\u21c4 " + (reversed ? labels[1] + " \u2192 " + labels[0] : labels[0] + " \u2192 " + labels[1]);
 				// Article mode finds the German side itself, so the direction does not apply.
-				$("fc-dir").style.display = empty || showCal || answerMode === "article" ? "none" : "";
+				$("fc-dir").style.display = empty || showCal || answerMode === "article" || numbers ? "none" : "";
 				if (showCal) {
 					renderCalendar();
 					return;
@@ -1059,16 +1280,44 @@
 					renderQuiz();
 					return;
 				}
+				if (finished) {
+					renderSummary();
+					return;
+				}
 				var card = cards[index];
-				var typing = answerMode === "type";
+				var typing = answerMode === "type" || numbers;
 				var noun = answerMode === "article" ? nounOf(card) : null;
 				var side = noun ? articleSide : reversed !== flipped ? 1 : 0;
 				var refocus = typing && document.activeElement && document.activeElement.id === "fc-input";
-				recordView(card);
+				if (!numbers) recordView(card);
 				var saved = getReviewKeys().indexOf(cardKey(card)) >= 0;
-				$("fc-count").textContent = (reviewOnly ? "Review " : "Card ") + (index + 1) + " / " + cards.length;
+				$("fc-count").textContent =
+					(numbers ? "Number " : reviewOnly ? "Review " : "Card ") + (index + 1) + " / " + cards.length;
 				$("fc-body").innerHTML =
 					'<div class="fc-card' + (flipped ? " fc-back" : "") + (noun ? " fc-noun" : "") + '" id="fc-card">' +
+					(numbers ? renderListen() : renderFace(card, side, noun, typing, saved)) +
+					"</div>" +
+					(typing ? renderTyping(card) : "") +
+					(noun ? renderArticles(noun) : "");
+				if (answerMode === "flip") $("fc-card").onclick = flip;
+				if (numbers) $("fc-card").onclick = speak;
+				if (typing) bindTyping(refocus);
+				if (noun) bindArticles();
+				if (!numbers) {
+					$("fc-save").onclick = function (e) {
+						e.stopPropagation();
+						toggleReview(card);
+						render();
+					};
+				}
+				if (numbers && speakNext) {
+					speakNext = false;
+					speak();
+				}
+			}
+
+			function renderFace(card, side, noun, typing, saved) {
+				return (
 					'<span class="fc-label">' + escapeHTML(labels[side]) + "</span>" +
 					'<button type="button" id="fc-save" class="fc-save' + (saved ? " fc-saved" : "") + '" aria-pressed="' + saved +
 					'" title="' + (saved ? "Remove from review" : "Mark this card to review later") + '">' +
@@ -1078,18 +1327,19 @@
 						? '<div class="fc-hint">' + escapeHTML(card[1 - articleSide]) + "</div>"
 						: typing
 							? ""
-							: '<div class="fc-hint">' + (flipped ? "" : "Tap card to flip") + "</div>") +
-					"</div>" +
-					(typing ? renderTyping(card) : "") +
-					(noun ? renderArticles(noun) : "");
-				if (answerMode === "flip") $("fc-card").onclick = flip;
-				if (typing) bindTyping(refocus);
-				if (noun) bindArticles();
-				$("fc-save").onclick = function (e) {
-					e.stopPropagation();
-					toggleReview(card);
-					render();
-				};
+							: '<div class="fc-hint">' + (flipped ? "" : "Tap card to flip") + "</div>")
+				);
+			}
+
+			// Number mode: the card is a play button; the number is only heard.
+			function renderListen() {
+				return (
+					'<span class="fc-label">Listen</span>' +
+					'<div class="fc-text fc-listen">\ud83d\udd0a</div>' +
+					'<div class="fc-hint">' +
+					(window.speechSynthesis ? "Tap to hear the number again" : "This browser cannot read text aloud.") +
+					"</div>"
+				);
 			}
 
 			// The noun alone until an article is picked, then with its article in the Klett colour.
@@ -1128,18 +1378,24 @@
 			function pickArticle(article) {
 				if (picked) return;
 				picked = article;
+				saveCard();
 				render();
 			}
 
 			function renderTyping(card) {
+				var numbers = answerMode === "number";
 				var answerSide = reversed ? 0 : 1;
 				return (
 					'<input id="fc-input" class="fc-input' + (result ? " fc-" + result : "") + '" type="text"' +
 					' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+					(numbers ? ' inputmode="numeric"' : "") +
 					(answered() ? " readonly" : "") +
-					' placeholder="Type the ' + escapeHTML(labels[answerSide]) + '&hellip;" />' +
-					(answered() ? "" : renderLetters()) +
-					renderVerdict(cardHTML(card, answerSide))
+					' placeholder="Type the ' + (numbers ? "number" : escapeHTML(labels[answerSide])) + '&hellip;" />' +
+					'<button type="button" id="fc-check" class="fc-primary fc-check">' + $("fc-flip").textContent + "</button>" +
+					(answered() || numbers ? "" : renderLetters()) +
+					(numbers
+						? renderVerdict(escapeHTML(card[0]) + " \u00b7 " + escapeHTML(card[1]), card[1])
+						: renderVerdict(cardHTML(card, answerSide)))
 				);
 			}
 
@@ -1153,6 +1409,7 @@
 				if ($("fc-show")) {
 					$("fc-show").onclick = function () {
 						result = "shown";
+						saveCard();
 						render();
 					};
 				}
@@ -1162,6 +1419,11 @@
 						flip();
 					}
 				};
+				// mousedown keeps focus in the input, so the phone keyboard stays open.
+				$("fc-check").onmousedown = function (e) {
+					e.preventDefault();
+				};
+				$("fc-check").onclick = flip;
 				bindLetters(function () {
 					return input;
 				});
@@ -1193,18 +1455,12 @@
 				});
 			}
 
-			function newQuiz() {
-				var pool = cards.slice();
-				shuffle(pool);
-				quiz = { cards: pool.slice(0, QUIZ_SIZE), answers: [], results: null };
-			}
-
 			// Quiz: a random set of cards, all answered on one page and submitted together.
 			function renderQuiz() {
-				if (!quiz) newQuiz();
+				if (!quiz) quiz = { answers: [], results: null };
 				var answerSide = reversed ? 0 : 1;
 				var done = !!quiz.results;
-				var total = quiz.cards.length;
+				var total = cards.length;
 				var score = done
 					? quiz.results.filter(function (r) {
 							return r === "right";
@@ -1215,7 +1471,7 @@
 					'<form id="fc-quiz" class="fc-quiz" novalidate>' +
 					(done ? '<div class="fc-score">' + score + " / " + total + " correct</div>" : "") +
 					"<ol>" +
-					quiz.cards
+					cards
 						.map(function (card, i) {
 							var r = done ? quiz.results[i] : "";
 							return (
@@ -1264,7 +1520,7 @@
 				$("fc-quiz").onsubmit = function (e) {
 					e.preventDefault();
 					if (!done) return submitQuiz();
-					newQuiz();
+					newRound();
 					render();
 					$("fc-app").scrollIntoView();
 				};
@@ -1272,18 +1528,98 @@
 
 			function submitQuiz() {
 				var answerSide = reversed ? 0 : 1;
-				quiz.results = quiz.cards.map(function (card, i) {
+				quiz.results = cards.map(function (card, i) {
 					return checkAnswer(quiz.answers[i] || "", card[answerSide]);
 				});
-				quiz.cards.forEach(recordView);
+				cards.forEach(recordView);
 				render();
 				$("fc-app").scrollIntoView();
+			}
+
+			// Outcome of a card in the finished round: { mark: "right" | "wrong" | "skip" | "", note }.
+			function outcome(card, saved) {
+				if (answerMode === "article") {
+					var noun = nounOf(card);
+					if (!saved.picked) return { mark: "skip", note: "Skipped" };
+					if (saved.picked === noun.article) return { mark: "right", note: "" };
+					return { mark: "wrong", note: "You picked " + saved.picked };
+				}
+				if (answerMode === "type" || answerMode === "number") {
+					if (saved.result === "right") return { mark: "right", note: saved.tries > 1 ? "Right after " + saved.tries + " tries" : "" };
+					if (saved.result === "shown") return { mark: "wrong", note: "Answer shown" };
+					if (saved.result === "wrong") return { mark: "wrong", note: "Not answered correctly" };
+					return { mark: "skip", note: "Skipped" };
+				}
+				return { mark: "", note: "" };
+			}
+
+			// Summary shown after the last card of a round.
+			function renderSummary() {
+				var keys = getReviewKeys();
+				var article = answerMode === "article";
+				var answerSide = article ? 1 - articleSide : answerMode === "number" ? 0 : reversed ? 0 : 1;
+				var results = cards.map(function (card, i) {
+					return outcome(card, log[i] || {});
+				});
+				var count = function (test) {
+					return results.filter(test).length;
+				};
+				var right = count(function (r) {
+					return r.mark === "right";
+				});
+				var total = cards.length;
+				var head;
+				if (answerMode === "flip") {
+					var marked = cards.filter(function (card) {
+						return keys.indexOf(cardKey(card)) >= 0;
+					}).length;
+					head =
+						'<div class="fc-score">' + total + (total === 1 ? " card" : " cards") + " done</div>" +
+						'<div class="fc-score-sub">' + marked + " marked for review</div>";
+				} else {
+					head = '<div class="fc-score">' + right + " / " + total + " correct</div>";
+					if (answerMode === "type" || answerMode === "number") {
+						var first = count(function (r) {
+							return r.mark === "right" && !r.note;
+						});
+						head += '<div class="fc-score-sub">' + first + " right on the first try</div>";
+					}
+				}
+				$("fc-count").textContent = "Round done";
+				$("fc-body").innerHTML =
+					'<div class="fc-quiz">' +
+					head +
+					"<ol>" +
+					cards
+						.map(function (card, i) {
+							var r = results[i];
+							var mark = { right: "\u2713", wrong: "\u2717", skip: "\u2013" }[r.mark] || "";
+							return (
+								'<li class="fc-q' + (r.mark ? " fc-" + r.mark : "") + '">' +
+								(mark ? '<span class="fc-q-mark">' + mark + "</span>" : "") +
+								'<div class="fc-q-prompt"><span class="fc-q-num">' + (i + 1) + ".</span> " +
+								(keys.indexOf(cardKey(card)) >= 0 ? '<span class="fc-star">\u2605</span> ' : "") +
+								cardHTML(card, 1 - answerSide) + "</div>" +
+								'<div class="fc-q-answer">' + cardHTML(card, answerSide) + "</div>" +
+								(r.note ? '<div class="fc-sum-note">' + escapeHTML(r.note) + "</div>" : "") +
+								"</li>"
+							);
+						})
+						.join("") +
+					"</ol>" +
+					'<button type="button" id="fc-again" class="fc-primary fc-quiz-go">New round</button>' +
+					"</div>";
+				$("fc-again").onclick = function () {
+					newRound();
+					render();
+					$("fc-app").scrollIntoView();
+				};
 			}
 
 			// In type mode the main button checks the answer until the card is answered, then moves on.
 			function flip() {
 				if (answerMode === "article") return go(1);
-				if (answerMode === "type") {
+				if (answerMode === "type" || answerMode === "number") {
 					if (answered()) go(1);
 					else check();
 					return;
@@ -1292,12 +1628,20 @@
 				render();
 			}
 
+			// Moving past the last card ends the round and shows its summary.
 			function go(step) {
-				index = (index + step + cards.length) % cards.length;
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				var next = index + step;
+				if (next < 0) return;
+				saveCard();
+				if (next >= cards.length) {
+					finished = true;
+					render();
+					$("fc-app").scrollIntoView();
+					return;
+				}
+				index = next;
+				loadCard();
+				speakNext = !answered();
 				render();
 			}
 
@@ -1305,19 +1649,14 @@
 			$("fc-mode").onclick = function (e) {
 				var b = e.target.closest("button");
 				if (!b || b.dataset.mode === answerMode) return;
-				var deckChanges = answerMode === "article" || b.dataset.mode === "article";
 				answerMode = b.dataset.mode;
-				if (deckChanges) buildDeck();
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				buildDeck();
 				try {
 					if (answerMode === "flip") localStorage.removeItem(MODE_KEY);
 					else localStorage.setItem(MODE_KEY, answerMode);
 				} catch (e) {}
 				render();
-				if (answerMode === "type") $("fc-input").focus();
+				if (answerMode === "type" || answerMode === "number") $("fc-input").focus();
 			};
 			$("fc-prev").onclick = function () {
 				go(-1);
@@ -1326,12 +1665,35 @@
 				go(1);
 			};
 			$("fc-shuffle").onclick = function () {
-				shuffle(cards);
-				index = 0;
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				newRound();
+				render();
+			};
+			$("fc-min").value = numMin;
+			$("fc-max").value = numMax;
+			$("fc-min").onchange = $("fc-max").onchange = function () {
+				var lo = Number($("fc-min").value);
+				var hi = Number($("fc-max").value);
+				var valid = Number.isInteger(lo) && Number.isInteger(hi) && lo >= 0 && hi <= MAX_NUMBER && lo < hi;
+				$("fc-range-error").textContent = valid
+					? ""
+					: "Use whole numbers from 0 to " + MAX_NUMBER + ", with the first below the second.";
+				if (!valid) return;
+				numMin = lo;
+				numMax = hi;
+				try {
+					localStorage.setItem(RANGE_KEY, JSON.stringify([lo, hi]));
+				} catch (e) {}
+				newRound();
+				render();
+			};
+			$("fc-size").onclick = function (e) {
+				var b = e.target.closest("button");
+				if (!b) return;
+				roundSize = Number(b.dataset.size);
+				try {
+					localStorage.setItem(SIZE_KEY, String(roundSize));
+				} catch (e) {}
+				newRound();
 				render();
 			};
 			$("fc-review").onclick = function () {
@@ -1341,11 +1703,7 @@
 			};
 			$("fc-dir").onclick = function () {
 				reversed = !reversed;
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
-				quiz = null;
+				newRound();
 				render();
 			};
 
@@ -1369,17 +1727,13 @@
 					render();
 				}
 			};
-			// Clicking a row in the list opens that card.
+			// Clicking a row in the list starts a round with that card first.
 			$("fc-body").addEventListener("click", function (e) {
 				if (e.target.closest("#fc-cal-prev")) return shiftMonth(-1);
 				if (e.target.closest("#fc-cal-next")) return shiftMonth(1);
 				var row = e.target.closest(".fc-result");
 				if (!row) return;
-				index = Number(row.dataset.i);
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				newRound(sheetCards[Number(row.dataset.i)]);
 				view = "cards";
 				$("fc-search").value = "";
 				render();
@@ -1407,11 +1761,18 @@
 					}
 				} else if (answerMode === "quiz") {
 					return;
+				} else if (finished) {
+					if (e.key === "Enter") {
+						newRound();
+						render();
+					}
 				} else if (answerMode === "article" && ARTICLES[e.key - 1]) {
 					pickArticle(ARTICLES[e.key - 1]);
+				} else if (answerMode === "number" && e.key === "p") {
+					speak();
 				} else if (e.key === "ArrowRight") go(1);
 				else if (e.key === "ArrowLeft") go(-1);
-				else if (e.key === "s") {
+				else if (e.key === "s" && answerMode !== "number") {
 					toggleReview(cards[index]);
 					render();
 				} else if (e.key === " " || e.key === "Enter") {
@@ -1516,13 +1877,11 @@
 
 			function load(link) {
 				var request = ++loadId;
+				deck = [];
 				cards = [];
 				sheetCards = [];
 				index = 0;
-				flipped = false;
-				typed = "";
-				result = null;
-				picked = null;
+				finished = false;
 				reviewOnly = false;
 				quiz = null;
 				["fc-prev", "fc-flip", "fc-next", "fc-shuffle", "fc-list", "fc-review"].forEach(function (id) {
@@ -1543,7 +1902,7 @@
 						var rows = parseCSV(text);
 						var header = rows.shift() || [];
 						labels = [(header[0] || "").trim() || "Front", (header[1] || "").trim() || "Back"];
-						cards = rows
+						sheetCards = rows
 							.map(function (r) {
 								return [(r[0] || "").trim(), (r[1] || "").trim()];
 							})
@@ -1551,7 +1910,6 @@
 								return c[0] && c[1];
 							});
 						setSaved(link === DEFAULT_URL ? null : link);
-						sheetCards = cards.slice();
 						articleSide = findArticleSide();
 						buildDeck();
 						render();
