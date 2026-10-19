@@ -136,8 +136,15 @@
 		}
 
 		/* Setup */
+		#fc-app .fc-box {
+			margin-bottom: 12px;
+			padding: 12px 14px 14px;
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+			text-align: left;
+		}
 		#fc-app .fc-group-label {
-			margin: 0 0 8px;
+			margin: 0 0 10px;
 			font-size: 13px;
 			text-align: left;
 			text-transform: uppercase;
@@ -148,7 +155,6 @@
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 			gap: 8px;
-			margin-bottom: 16px;
 		}
 		#fc-app .fc-mode button {
 			padding: 12px 4px;
@@ -163,10 +169,6 @@
 			border-color: var(--fc-accent);
 			color: #fff;
 		}
-		#fc-app .fc-options {
-			padding-top: 4px;
-			border-top: 1px solid var(--fc-border);
-		}
 		#fc-app .fc-opt {
 			display: flex;
 			flex-wrap: wrap;
@@ -176,6 +178,12 @@
 			margin-top: 12px;
 			color: var(--fc-muted);
 			text-align: left;
+		}
+		#fc-app .fc-mode + .fc-group-label {
+			margin-top: 16px;
+		}
+		#fc-app .fc-group-label + .fc-opt {
+			margin-top: 0;
 		}
 		#fc-app .fc-size-opts,
 		#fc-app #fc-dir {
@@ -226,6 +234,13 @@
 		#fc-app .fc-range .fc-settings-error {
 			flex-basis: 100%;
 			margin: 0;
+		}
+		/* Start stays in reach on small screens until the page scrolls to it */
+		#fc-app #fc-start {
+			position: sticky;
+			bottom: 12px;
+			z-index: 1;
+			box-shadow: 0 0 0 6px var(--fc-page);
 		}
 		#fc-app .fc-note {
 			margin-top: 16px;
@@ -678,6 +693,157 @@
 			color: var(--fc-muted);
 		}
 
+		/* Progress panels */
+		#fc-app .fc-panel {
+			margin-bottom: 16px;
+			padding: 14px 16px 16px;
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+			text-align: left;
+		}
+		#fc-app .fc-tiles.fc-streak {
+			margin-bottom: 16px;
+		}
+		#fc-app .fc-panel-note {
+			margin-bottom: 12px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-tiles {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+		}
+		#fc-app .fc-tile {
+			padding: 12px 8px;
+			background: var(--fc-card);
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+			text-align: center;
+		}
+		#fc-app .fc-tile-value {
+			font-size: 28px;
+			font-weight: 600;
+		}
+		#fc-app .fc-tile-label {
+			font-size: 14px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-stack {
+			display: flex;
+			gap: 2px;
+			height: 12px;
+			overflow: hidden;
+			border-radius: 4px;
+			background: var(--fc-border);
+		}
+		#fc-app .fc-stack span {
+			min-width: 2px;
+		}
+		#fc-app .fc-legend {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px 16px;
+			margin: 10px 0 16px;
+		}
+		#fc-app .fc-swatch {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			margin-right: 6px;
+			border-radius: 2px;
+		}
+		#fc-app .fc-known {
+			background: var(--fc-right);
+		}
+		#fc-app .fc-learning {
+			background: var(--fc-star);
+		}
+		#fc-app .fc-new {
+			background: var(--fc-muted);
+		}
+		#fc-app .fc-missed {
+			margin: 0 0 12px;
+			padding: 0;
+			list-style: none;
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+		}
+		#fc-app .fc-missed li {
+			display: grid;
+			grid-template-columns: 1fr 1fr auto;
+			gap: 12px;
+			padding: 10px 14px;
+			word-break: break-word;
+		}
+		#fc-app .fc-missed li + li {
+			border-top: 1px solid var(--fc-border);
+		}
+		#fc-app .fc-missed-count {
+			color: var(--fc-muted);
+			white-space: nowrap;
+		}
+		#fc-app .fc-trend {
+			display: grid;
+			grid-template-columns: 7.5em 1fr 3em;
+			align-items: end;
+			gap: 12px;
+			padding: 8px 0;
+		}
+		#fc-app .fc-trend + .fc-trend {
+			border-top: 1px solid var(--fc-border);
+		}
+		#fc-app .fc-trend-cols {
+			display: flex;
+			align-items: flex-end;
+			justify-content: space-between;
+			height: 48px;
+		}
+		#fc-app .fc-trend-cols span {
+			width: 20px;
+			background: var(--fc-accent);
+			border-radius: 4px 4px 0 0;
+		}
+		#fc-app .fc-trend-cols span.fc-none {
+			height: 2px;
+			background: var(--fc-border);
+			border-radius: 0;
+		}
+		#fc-app .fc-trend-value {
+			font-weight: 600;
+			text-align: right;
+		}
+		#fc-app .fc-trend-axis {
+			display: flex;
+			justify-content: space-between;
+			font-size: 13px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-confusion {
+			display: grid;
+			grid-template-columns: 7em repeat(3, 1fr);
+			gap: 2px;
+			text-align: center;
+		}
+		#fc-app .fc-confusion > div {
+			padding: 12px 4px;
+		}
+		#fc-app .fc-confusion .fc-head {
+			color: var(--fc-muted);
+			font-size: 14px;
+		}
+		#fc-app .fc-confusion .fc-cell {
+			background: var(--fc-card);
+			border-radius: 4px;
+			font-weight: 600;
+		}
+		#fc-app .fc-dot {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			margin-right: 6px;
+			border-radius: 50%;
+		}
+
 		/* Collapsible sections */
 		#fc-app .fc-settings {
 			margin-top: 20px;
@@ -766,7 +932,8 @@
 
 	<section id="fc-practice">
 		<div id="fc-setup">
-			<div id="fc-modes">
+			<!-- One box: only one exercise can be picked -->
+			<div id="fc-modes" class="fc-box">
 				<div class="fc-group-label">Vocabulary &middot; from your sheet</div>
 				<div class="fc-mode">
 					<button type="button" data-mode="flip">Flashcards</button>
@@ -779,7 +946,8 @@
 				</div>
 			</div>
 
-			<div class="fc-options">
+			<div class="fc-box">
+				<div class="fc-group-label">Options</div>
 				<div class="fc-opt" id="fc-opt-dir">
 					<span>Direction</span>
 					<button id="fc-dir" type="button" title="Swap the question and answer sides"></button>
@@ -862,8 +1030,11 @@
 	</section>
 
 	<section id="fc-progress">
-		<div class="fc-section-title">Cards practised per day</div>
-		<div id="fc-cal"></div>
+		<div id="fc-stats"></div>
+		<div class="fc-panel">
+			<div class="fc-section-title">Cards practised per day</div>
+			<div id="fc-cal"></div>
+		</div>
 	</section>
 
 	<script>
@@ -891,6 +1062,11 @@
 			var THEME_NAMES = { auto: "Auto", light: "Light", dark: "Dark" };
 			var STATS_KEY = "learnde-flashcards-stats";
 			var REVIEW_KEY = "learnde-flashcards-review";
+			var ROUNDS_KEY = "learnde-flashcards-rounds"; // [{ d: day, m: mode, n: answered, r: right }]
+			var WORDS_KEY = "learnde-flashcards-words"; // { cardKey: { h: last results "1"/"0", c: right, w: wrong } }
+			var ARTICLE_STATS_KEY = "learnde-flashcards-articles"; // { correct article: { picked article: count } }
+			var NUMBER_STATS_KEY = "learnde-flashcards-numbers"; // { checked, swaps, recent: ["47 \u2192 74"] }
+			var SCORED_MODES = ["quiz", "article", "number"];
 			var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 			var tab = "practice"; // "practice", "words" or "progress"
@@ -915,6 +1091,9 @@
 			var tries = 0; // answers checked for the current card
 			var quiz = null; // { answers, results } for the round; results stay null until submitted
 			var picked = null; // article chosen for the current card in article mode
+			var swapHint = false; // the last number answer had its tens and ones swapped
+			var customCards = null; // cards for a round started from Progress, instead of a random pick
+			var roundSaved = false; // this round's result is already in the history
 			var articleSide = 1; // column that holds the German nouns with their articles
 			var numMin = 1;
 			var numMax = 100;
@@ -1143,8 +1322,14 @@
 			}
 
 			// Pick `roundSize` random cards from the deck. Number mode makes up random numbers instead.
-			function newRound() {
-				if (answerMode === "number") {
+			// `list`, when given, is the exact set of cards to practise.
+			function newRound(list) {
+				customCards = list || null;
+				roundSaved = false;
+				if (customCards) {
+					cards = customCards.slice();
+					shuffle(cards);
+				} else if (answerMode === "number") {
 					cards = [];
 					for (var i = 0; i < roundLength(); i++) cards.push(randomNumberCard());
 					speakNext = true;
@@ -1173,6 +1358,129 @@
 				result = saved.result || null;
 				tries = saved.tries || 0;
 				picked = saved.picked || null;
+				swapHint = false;
+			}
+
+			function readJSON(key, fallback) {
+				try {
+					return JSON.parse(localStorage.getItem(key)) || fallback;
+				} catch (e) {
+					return fallback;
+				}
+			}
+
+			function writeJSON(key, value) {
+				try {
+					localStorage.setItem(key, JSON.stringify(value));
+				} catch (e) {}
+			}
+
+			// Keep the last 8 results of a word.
+			function recordWord(card, right) {
+				var words = readJSON(WORDS_KEY, {});
+				var entry = words[cardKey(card)] || { h: "", c: 0, w: 0 };
+				entry.h = (entry.h + (right ? "1" : "0")).slice(-8);
+				if (right) entry.c++;
+				else entry.w++;
+				words[cardKey(card)] = entry;
+				writeJSON(WORDS_KEY, words);
+			}
+
+			// "new" before the first result, "known" after 3 right answers in a row, else "learning".
+			function mastery(entry) {
+				if (!entry) return "new";
+				return entry.h.slice(-3) === "111" ? "known" : "learning";
+			}
+
+			function recordArticle(actual, chosen) {
+				var stats = readJSON(ARTICLE_STATS_KEY, {});
+				stats[actual] = stats[actual] || {};
+				stats[actual][chosen] = (stats[actual][chosen] || 0) + 1;
+				writeJSON(ARTICLE_STATS_KEY, stats);
+			}
+
+			// German says the ones before the tens ("siebenundvierzig" is 47), so 74 for 47 is a typical slip.
+			// True when `given` is `answer` with tens and ones swapped in one or more groups of three digits.
+			function swappedDigits(given, answer) {
+				given = given.replace(/[\s.,]/g, "");
+				if (given.length !== answer.length || given === answer) return false;
+				for (var end = answer.length; end > 0; end -= 3) {
+					var a = answer.slice(Math.max(0, end - 3), end);
+					var g = given.slice(Math.max(0, end - 3), end);
+					if (a === g) continue;
+					var n = a.length;
+					// Only "-und-" numbers (tens 2-9, ones 1-9) are said ones first.
+					if (n < 2 || a[n - 2] < "2" || a[n - 1] === "0") return false;
+					if (g !== a.slice(0, n - 2) + a[n - 1] + a[n - 2]) return false;
+				}
+				return true;
+			}
+
+			function recordNumberCheck(card, given, swapped) {
+				var stats = readJSON(NUMBER_STATS_KEY, { checked: 0, swaps: 0, recent: [] });
+				stats.checked++;
+				if (swapped) {
+					stats.swaps++;
+					stats.recent = [card[0] + " \u2192 " + given.replace(/[\s.,]/g, "")].concat(stats.recent).slice(0, 5);
+				}
+				writeJSON(NUMBER_STATS_KEY, stats);
+			}
+
+			// Save the round's score once, when its summary first shows.
+			function saveRound() {
+				if (roundSaved) return;
+				roundSaved = true;
+				var results = roundCards().map(outcome);
+				var answered = results.filter(function (r) {
+					return r.mark !== "skip";
+				});
+				if (!answered.length) return;
+				var rounds = readJSON(ROUNDS_KEY, []);
+				rounds.push({
+					d: dateKey(new Date()),
+					m: answerMode,
+					n: answered.length,
+					// Numbers allow retries, so its score is the answers right on the first try.
+					r: answerMode === "flip" ? null : answered.filter(function (r) {
+						return r.mark === "right" && !(answerMode === "number" && r.note);
+					}).length,
+				});
+				writeJSON(ROUNDS_KEY, rounds.slice(-1000));
+			}
+
+			function addDays(key, days) {
+				var parts = key.split("-");
+				return dateKey(new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) + days));
+			}
+
+			// Days in a row with any practice; today still counts as kept until it ends.
+			function streaks() {
+				var days = {};
+				var counts = loadStats().counts;
+				Object.keys(counts).forEach(function (d) {
+					if (counts[d]) days[d] = true;
+				});
+				readJSON(ROUNDS_KEY, []).forEach(function (round) {
+					days[round.d] = true;
+				});
+				var today = dateKey(new Date());
+				var day = days[today] ? today : addDays(today, -1);
+				var current = 0;
+				while (days[day]) {
+					current++;
+					day = addDays(day, -1);
+				}
+				var best = 0;
+				var run = 0;
+				var previous = null;
+				Object.keys(days)
+					.sort()
+					.forEach(function (d) {
+						run = previous && addDays(previous, 1) === d ? run + 1 : 1;
+						best = Math.max(best, run);
+						previous = d;
+					});
+				return { current: current, best: best };
 			}
 
 			// { counts: { "YYYY-MM-DD": n }, day: today's key, seen: cards counted today }
@@ -1230,6 +1538,8 @@
 					return;
 				}
 				result = checkNumber(typed, cards[index]);
+				swapHint = result === "wrong" && swappedDigits(typed, cards[index][0]);
+				recordNumberCheck(cards[index], typed, swapHint);
 				tries++;
 				saveCard();
 				render();
@@ -1248,7 +1558,10 @@
 				$("fc-words").hidden = tab !== "words";
 				$("fc-progress").hidden = tab !== "progress";
 				if (tab === "words") return renderWords();
-				if (tab === "progress") return renderCalendar();
+				if (tab === "progress") {
+					renderStats();
+					return renderCalendar();
+				}
 				$("fc-setup").hidden = stage !== "setup";
 				$("fc-session").hidden = stage === "setup";
 				if (stage === "setup") return renderSetup();
@@ -1413,6 +1726,9 @@
 			function pickArticle(article) {
 				if (picked) return;
 				picked = article;
+				var actual = nounOf(cards[index]).article;
+				recordArticle(actual, article);
+				recordWord(cards[index], article === actual);
 				saveCard();
 				render();
 			}
@@ -1427,7 +1743,9 @@
 				}
 				if (result === "wrong") {
 					return (
-						'<div class="fc-verdict fc-wrong">\u2717 Not quite. Edit your answer and check again.' +
+						'<div class="fc-verdict fc-wrong">\u2717 Not quite. ' +
+						(swapHint ? "Swapped digits? German says the ones before the tens. " : "") +
+						"Edit your answer and check again." +
 						'<br><button type="button" id="fc-show">Show answer</button></div>'
 					);
 				}
@@ -1565,7 +1883,10 @@
 				quiz.results = cards.map(function (card, i) {
 					return checkAnswer(quiz.answers[i] || "", card[answerSide]);
 				});
-				cards.forEach(recordView);
+				cards.forEach(function (card, i) {
+					recordView(card);
+					recordWord(card, quiz.results[i] === "right");
+				});
 				showSummary();
 			}
 
@@ -1597,7 +1918,7 @@
 				$("fc-bar").hidden = true;
 				$("fc-controls").hidden = true;
 				var keys = getReviewKeys();
-				var shown = answerMode === "quiz" ? cards : cards.slice(0, reached + 1);
+				var shown = roundCards();
 				var answerSide = answerMode === "article" ? 1 - articleSide : answerMode === "number" ? 0 : reversed ? 0 : 1;
 				var results = shown.map(outcome);
 				var count = function (test) {
@@ -1649,7 +1970,9 @@
 					'<button type="button" id="fc-again" class="fc-primary">Same again</button>' +
 					'<button type="button" id="fc-change">Change settings</button>' +
 					"</div></div>";
-				$("fc-again").onclick = startRound;
+				$("fc-again").onclick = function () {
+					startRound(customCards);
+				};
 				$("fc-change").onclick = function () {
 					stage = "setup";
 					render();
@@ -1677,7 +2000,8 @@
 				});
 				$("fc-words-count").textContent = query
 					? matches.length + (matches.length === 1 ? " match" : " matches")
-					: plural(sheetCards.length, "word") + " \u00b7 " + markedCount() + " marked \u00b7 tap a word to mark it";
+					: plural(sheetCards.length, "word") + " \u00b7 " + masteryCounts().known + " known \u00b7 " +
+						markedCount() + " marked \u00b7 tap a word to mark it";
 				if (!matches.length) {
 					$("fc-list").innerHTML = '<div class="fc-msg">No words match.</div>';
 					return;
@@ -1698,6 +2022,220 @@
 						})
 						.join("") +
 					"</div>";
+			}
+
+			function masteryCounts() {
+				var words = readJSON(WORDS_KEY, {});
+				var counts = { known: 0, learning: 0, new: 0 };
+				sheetCards.forEach(function (card) {
+					counts[mastery(words[cardKey(card)])]++;
+				});
+				return counts;
+			}
+
+			// Monday of the week that `key` falls in.
+			function weekOf(key) {
+				var parts = key.split("-");
+				var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+				return addDays(key, -((d.getDay() + 6) % 7));
+			}
+
+			function renderStats() {
+				$("fc-stats").innerHTML =
+					renderStreak() + renderMastery() + renderTrend() + renderConfusion() + renderNumberStats();
+				if ($("fc-practise-missed")) {
+					$("fc-practise-missed").onclick = function () {
+						answerMode = "quiz";
+						tab = "practice";
+						startRound(mostMissed());
+					};
+				}
+			}
+
+			function tile(value, label) {
+				return '<div class="fc-tile"><div class="fc-tile-value">' + value + '</div><div class="fc-tile-label">' +
+					label + "</div></div>";
+			}
+
+			function renderStreak() {
+				var s = streaks();
+				var today = loadStats().counts[dateKey(new Date())] || 0;
+				return (
+					'<div class="fc-tiles fc-streak">' +
+					tile(s.current, (s.current === 1 ? "day" : "days") + " in a row") +
+					tile(s.best, "best streak") +
+					tile(today, (today === 1 ? "card" : "cards") + " today") +
+					"</div>"
+				);
+			}
+
+			// Words of the sheet missed most often, worst first.
+			function mostMissed() {
+				var words = readJSON(WORDS_KEY, {});
+				return sheetCards
+					.filter(function (card) {
+						var entry = words[cardKey(card)];
+						return entry && entry.w && mastery(entry) !== "known";
+					})
+					.sort(function (a, b) {
+						return words[cardKey(b)].w - words[cardKey(a)].w;
+					})
+					.slice(0, 10);
+			}
+
+			function renderMastery() {
+				if (loadState !== "ready") return "";
+				var counts = masteryCounts();
+				var words = readJSON(WORDS_KEY, {});
+				var missed = mostMissed();
+				var parts = ["known", "learning", "new"];
+				var names = { known: "Known", learning: "Learning", new: "New" };
+				return (
+					'<div class="fc-panel"><div class="fc-section-title">Words</div>' +
+					'<div class="fc-panel-note">Known means right the last 3 times, in Quiz or der \u00b7 das \u00b7 die.</div>' +
+					'<div class="fc-stack" role="img" aria-label="' +
+					parts.map(function (p) {
+						return names[p] + " " + counts[p];
+					}).join(", ") + '">' +
+					parts
+						.filter(function (p) {
+							return counts[p];
+						})
+						.map(function (p) {
+							return '<span class="fc-' + p + '" style="flex-grow:' + counts[p] + '" title="' + names[p] + ": " +
+								counts[p] + '"></span>';
+						})
+						.join("") +
+					"</div>" +
+					'<div class="fc-legend">' +
+					parts.map(function (p) {
+						return '<span><span class="fc-swatch fc-' + p + '"></span>' + names[p] + " " + counts[p] + "</span>";
+					}).join("") +
+					"</div>" +
+					(missed.length
+						? '<div class="fc-section-title">Most missed</div><ul class="fc-missed">' +
+							missed.map(function (card) {
+								var entry = words[cardKey(card)];
+								return (
+									"<li><span>" + cardHTML(card, 0) + "</span><span>" + cardHTML(card, 1) + "</span>" +
+									'<span class="fc-missed-count">\u2717 ' + entry.w + " \u00b7 \u2713 " + entry.c + "</span></li>"
+								);
+							}).join("") +
+							'</ul><button type="button" id="fc-practise-missed" class="fc-primary fc-big">Practise these in a quiz</button>'
+						: '<div class="fc-panel-note">No missed words yet.</div>') +
+					"</div>"
+				);
+			}
+
+			// Weekly accuracy of the scored exercises over the last 6 weeks, oldest first.
+			function renderTrend() {
+				var thisWeek = weekOf(dateKey(new Date()));
+				var weeks = [];
+				for (var i = 5; i >= 0; i--) weeks.push(addDays(thisWeek, -7 * i));
+				var totals = {};
+				readJSON(ROUNDS_KEY, []).forEach(function (round) {
+					if (SCORED_MODES.indexOf(round.m) < 0) return;
+					var w = weeks.indexOf(weekOf(round.d));
+					if (w < 0) return;
+					totals[round.m] = totals[round.m] || weeks.map(function () {
+						return { n: 0, r: 0 };
+					});
+					totals[round.m][w].n += round.n;
+					totals[round.m][w].r += round.r;
+				});
+				var modes = SCORED_MODES.filter(function (m) {
+					return totals[m];
+				});
+				var body = modes.length
+					? modes
+							.map(function (m) {
+								var latest = null;
+								var cols = totals[m]
+									.map(function (t, w) {
+										if (!t.n) return '<span class="fc-none" title="No rounds"></span>';
+										var pct = Math.round((t.r / t.n) * 100);
+										latest = pct;
+										return '<span style="height:' + Math.max(pct, 4) + '%" title="Week of ' + weeks[w] + ": " + pct +
+											"% (" + t.r + " of " + t.n + ')"></span>';
+									})
+									.join("");
+								return (
+									'<div class="fc-trend"><span>' + MODE_NAMES[m] + '</span><div class="fc-trend-cols">' + cols +
+									'</div><span class="fc-trend-value">' + latest + "%</span></div>"
+								);
+							})
+							.join("") +
+						'<div class="fc-trend"><span></span><div class="fc-trend-axis"><span>6 weeks ago</span><span>this week</span></div><span></span></div>' +
+						(totals.number ? '<div class="fc-panel-note">Numbers counts answers right on the first try.</div>' : "")
+					: '<div class="fc-panel-note">Finish a Quiz, der \u00b7 das \u00b7 die or Numbers round to see your accuracy here.</div>';
+				return '<div class="fc-panel"><div class="fc-section-title">Accuracy by week</div>' + body + "</div>";
+			}
+
+			// Which article you pick for each correct article; wrong picks are shaded by how often they happen.
+			function renderConfusion() {
+				var stats = readJSON(ARTICLE_STATS_KEY, {});
+				var worst = null;
+				var maxWrong = 0;
+				ARTICLES.forEach(function (actual) {
+					ARTICLES.forEach(function (chosen) {
+						var n = (stats[actual] || {})[chosen] || 0;
+						if (actual !== chosen && n > maxWrong) {
+							maxWrong = n;
+							worst = { actual: actual, chosen: chosen, n: n };
+						}
+					});
+				});
+				if (!Object.keys(stats).length) return "";
+				var dot = function (article) {
+					return '<span class="fc-dot" style="background:var(--fc-' + article + ')"></span>' + article;
+				};
+				var cells = ['<div class="fc-head"></div>'].concat(
+					ARTICLES.map(function (chosen) {
+						return '<div class="fc-head">picked ' + chosen + "</div>";
+					})
+				);
+				ARTICLES.forEach(function (actual) {
+					cells.push('<div class="fc-head">' + dot(actual) + " nouns</div>");
+					ARTICLES.forEach(function (chosen) {
+						var n = (stats[actual] || {})[chosen] || 0;
+						var style = "";
+						if (actual !== chosen && n) {
+							var share = Math.round(15 + (n / maxWrong) * 40);
+							style = ' style="background:color-mix(in srgb, var(--fc-error) ' + share + '%, var(--fc-bg))"';
+						}
+						cells.push(
+							'<div class="fc-cell"' + style + ' title="' + actual + " nouns, picked " + chosen +
+							": " + n + '">' + n + "</div>"
+						);
+					});
+				});
+				return (
+					'<div class="fc-panel"><div class="fc-section-title">der \u00b7 das \u00b7 die mix-ups</div>' +
+					'<div class="fc-panel-note">' +
+					(worst
+						? "Most common mix-up: picking <b>" + worst.chosen + "</b> for " + worst.actual + " nouns (" + worst.n + "\u00d7)."
+						: "No mix-ups yet.") +
+					"</div>" +
+					'<div class="fc-confusion">' + cells.join("") + "</div></div>"
+				);
+			}
+
+			function renderNumberStats() {
+				var stats = readJSON(NUMBER_STATS_KEY, null);
+				if (!stats || !stats.checked) return "";
+				return (
+					'<div class="fc-panel"><div class="fc-section-title">Numbers</div>' +
+					'<div class="fc-panel-note">German says the ones before the tens, so 47 (siebenundvierzig) is easy to type as 74.</div>' +
+					'<div class="fc-tiles">' +
+					tile(stats.swaps, "swapped digits") +
+					tile(stats.checked, "answers checked") +
+					tile(Math.round((stats.swaps / stats.checked) * 100) + "%", "swap rate") +
+					"</div>" +
+					(stats.recent.length
+						? '<div class="fc-legend">Recent: ' + stats.recent.map(escapeHTML).join(", ") + "</div>"
+						: "") +
+					"</div>"
+				);
 			}
 
 			function shiftMonth(step) {
@@ -1755,8 +2293,14 @@
 
 			// ---- Rounds ----
 
-			function startRound() {
-				newRound();
+			// The whole quiz, or the cards up to where the round ended.
+			function roundCards() {
+				return answerMode === "quiz" ? cards : cards.slice(0, reached + 1);
+			}
+
+			// `list` (from Progress) practises exactly those cards; buttons pass their click event instead.
+			function startRound(list) {
+				newRound(Array.isArray(list) ? list : null);
 				if (!cards.length) {
 					stage = "setup";
 					render();
@@ -1769,6 +2313,7 @@
 			}
 
 			function showSummary() {
+				saveRound();
 				stage = "summary";
 				if (window.speechSynthesis) speechSynthesis.cancel();
 				render();
