@@ -17,6 +17,9 @@
 			--fc-back-bg: #eff6ff;
 			--fc-back-border: #bfdbfe;
 			--fc-error: #dc2626;
+			--fc-star: #d97706;
+			--fc-right: #16a34a;
+			--fc-page: #ffffff;
 			max-width: 560px;
 			margin: 24px auto;
 			padding: 0 16px;
@@ -60,14 +63,17 @@
 			--fc-back-bg: #172554;
 			--fc-back-border: #1e40af;
 			--fc-error: #f87171;
+			--fc-star: #fbbf24;
+			--fc-right: #4ade80;
+			--fc-page: #0f172a;
 		}
 		#fc-app .fc-top {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			margin-bottom: 12px;
+			margin-bottom: 16px;
 			color: var(--fc-muted);
-			font-size: 14px;
+			font-size: 16px;
 			gap: 8px;
 		}
 		#fc-app .fc-top-right {
@@ -75,24 +81,31 @@
 			gap: 8px;
 			min-width: 0;
 		}
-		#fc-app #fc-count,
-		#fc-app #fc-list,
-		#fc-app #fc-theme {
-			flex-shrink: 0;
-			white-space: nowrap;
-		}
-		#fc-app #fc-dir {
+		#fc-app #fc-count {
 			min-width: 0;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
+		#fc-app #fc-list,
+		#fc-app #fc-cal {
+			flex-shrink: 0;
+			white-space: nowrap;
+		}
+		#fc-app #fc-dir {
+			width: 100%;
+			margin-bottom: 16px;
+			word-break: break-word;
+		}
+		#fc-app .fc-footer {
+			margin-top: 16px;
+		}
 		#fc-app .fc-search {
 			width: 100%;
 			box-sizing: border-box;
-			margin-bottom: 12px;
-			padding: 10px 12px;
-			font-size: 16px;
+			margin-bottom: 16px;
+			padding: 12px 14px;
+			font-size: 17px;
 			border: 1px solid var(--fc-border);
 			border-radius: 8px;
 			background: var(--fc-bg);
@@ -109,7 +122,7 @@
 			display: grid;
 			grid-template-columns: 1fr 1fr;
 			gap: 12px;
-			padding: 10px 14px;
+			padding: 14px 16px;
 		}
 		#fc-app .fc-results-head {
 			font-size: 12px;
@@ -121,7 +134,7 @@
 		#fc-app button.fc-result {
 			width: 100%;
 			text-align: left;
-			font-size: 16px;
+			font-size: 17px;
 			word-break: break-word;
 			border: 0;
 			border-top: 1px solid var(--fc-border);
@@ -159,27 +172,219 @@
 			letter-spacing: 0.08em;
 			color: var(--fc-muted);
 		}
+		#fc-app button.fc-save {
+			position: absolute;
+			top: 4px;
+			right: 4px;
+			padding: 8px 12px;
+			border: 0;
+			background: transparent;
+			color: var(--fc-muted);
+			font-size: 16px;
+		}
+		#fc-app button.fc-save.fc-saved {
+			color: var(--fc-star);
+			font-weight: 600;
+		}
+		#fc-app .fc-star {
+			color: var(--fc-star);
+		}
 		#fc-app .fc-text {
 			font-size: 32px;
 			font-weight: 600;
 			line-height: 1.3;
 			word-break: break-word;
 		}
+		#fc-app .fc-mode {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			margin-bottom: 16px;
+		}
+		#fc-app .fc-mode button {
+			padding: 12px 4px;
+			font-size: 16px;
+			white-space: nowrap;
+			border-radius: 0;
+		}
+		@media (max-width: 360px) {
+			#fc-app .fc-mode button {
+				font-size: 15px;
+			}
+		}
+		#fc-app .fc-mode button + button {
+			border-left: 0;
+		}
+		#fc-app .fc-mode button:first-child {
+			border-radius: 8px 0 0 8px;
+		}
+		#fc-app .fc-mode button:last-child {
+			border-radius: 0 8px 8px 0;
+		}
+		#fc-app .fc-mode button.fc-on {
+			background: var(--fc-accent);
+			border-color: var(--fc-accent);
+			color: #fff;
+		}
+		#fc-app .fc-input {
+			width: 100%;
+			box-sizing: border-box;
+			margin-top: 16px;
+			padding: 14px 16px;
+			font-size: 20px;
+			text-align: center;
+			border: 2px solid var(--fc-border);
+			border-radius: 12px;
+			background: var(--fc-bg);
+			color: var(--fc-fg);
+		}
+		#fc-app .fc-input:focus {
+			outline: none;
+			border-color: var(--fc-accent);
+		}
+		#fc-app .fc-input.fc-right {
+			border-color: var(--fc-right);
+		}
+		#fc-app .fc-input.fc-wrong {
+			border-color: var(--fc-error);
+		}
+		#fc-app .fc-letters {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 8px;
+		}
+		#fc-app .fc-letters button {
+			min-width: 48px;
+			padding: 8px;
+			font-size: 18px;
+		}
+		#fc-app .fc-verdict {
+			margin-top: 12px;
+			font-size: 18px;
+			line-height: 1.4;
+		}
+		#fc-app .fc-verdict b {
+			font-size: 22px;
+		}
+		#fc-app .fc-verdict.fc-right {
+			color: var(--fc-right);
+		}
+		#fc-app .fc-verdict.fc-wrong {
+			color: var(--fc-error);
+		}
+		#fc-app .fc-verdict .fc-correct {
+			display: block;
+			margin-top: 4px;
+			color: var(--fc-fg);
+		}
+		#fc-app .fc-verdict button {
+			margin-top: 12px;
+		}
+		#fc-app .fc-quiz {
+			text-align: left;
+		}
+		#fc-app .fc-quiz ol {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+		#fc-app .fc-q {
+			margin-bottom: 12px;
+			padding: 14px 16px;
+			background: var(--fc-card);
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+		}
+		#fc-app .fc-q.fc-right {
+			border-color: var(--fc-right);
+		}
+		#fc-app .fc-q.fc-wrong {
+			border-color: var(--fc-error);
+		}
+		#fc-app .fc-q-prompt {
+			font-size: 20px;
+			font-weight: 600;
+			word-break: break-word;
+		}
+		#fc-app .fc-q-num {
+			color: var(--fc-muted);
+			font-weight: 400;
+		}
+		#fc-app .fc-q-mark {
+			float: right;
+			font-size: 20px;
+			font-weight: 700;
+		}
+		#fc-app .fc-q.fc-right .fc-q-mark {
+			color: var(--fc-right);
+		}
+		#fc-app .fc-q.fc-wrong .fc-q-mark {
+			color: var(--fc-error);
+		}
+		#fc-app .fc-q .fc-input {
+			margin-top: 10px;
+			font-size: 18px;
+			text-align: left;
+		}
+		#fc-app .fc-q-answer {
+			margin-top: 8px;
+			font-size: 17px;
+		}
+		/* Keep the letter buttons in reach while scrolling through the quiz */
+		#fc-app .fc-quiz .fc-letters {
+			position: sticky;
+			bottom: 0;
+			margin: 0;
+			padding: 8px 0;
+			background: var(--fc-page);
+		}
+		#fc-app .fc-score {
+			margin-bottom: 16px;
+			font-size: 26px;
+			font-weight: 700;
+			text-align: center;
+		}
+		#fc-app button.fc-quiz-go {
+			width: 100%;
+			min-height: 56px;
+			margin-top: 8px;
+			font-size: 18px;
+		}
+		#fc-app .fc-rules {
+			margin: 12px 0 0;
+			padding-left: 20px;
+			line-height: 1.5;
+		}
+		#fc-app .fc-rules li {
+			margin-bottom: 6px;
+		}
 		#fc-app .fc-hint {
 			margin-top: 12px;
-			font-size: 13px;
+			font-size: 15px;
 			color: var(--fc-muted);
 		}
 		#fc-app .fc-controls {
-			display: flex;
-			gap: 8px;
-			justify-content: center;
-			flex-wrap: wrap;
-			margin-top: 16px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 12px;
+			margin-top: 20px;
+		}
+		#fc-app .fc-controls button {
+			min-height: 56px;
+			font-size: 18px;
+			white-space: nowrap;
+		}
+		#fc-app .fc-controls button.fc-wide {
+			grid-column: 1 / -1;
+		}
+		#fc-app .fc-controls button.fc-active {
+			border-color: var(--fc-star);
+			color: var(--fc-star);
 		}
 		#fc-app button {
-			padding: 10px 16px;
-			font-size: 15px;
+			min-height: 48px;
+			padding: 12px 18px;
+			font-size: 17px;
 			border-radius: 8px;
 			border: 1px solid var(--fc-border);
 			background: var(--fc-bg);
@@ -197,8 +402,8 @@
 		}
 		#fc-app .fc-open {
 			display: inline-block;
-			margin-top: 8px;
-			font-size: 14px;
+			margin-top: 12px;
+			font-size: 16px;
 			color: var(--fc-accent);
 			text-decoration: none;
 		}
@@ -210,33 +415,93 @@
 			color: var(--fc-muted);
 		}
 		@media (max-width: 480px) {
-			#fc-app .fc-controls {
-				flex-wrap: nowrap;
-				gap: 6px;
-			}
-			#fc-app .fc-controls button {
-				flex: 1 1 0;
-				padding: 10px 4px;
-				font-size: 14px;
-			}
 			#fc-app .fc-text {
 				font-size: 28px;
 			}
 			#fc-app .fc-top button {
-				padding: 8px 10px;
-				font-size: 14px;
+				min-width: 48px;
+				padding: 10px 12px;
 			}
-			#fc-app .fc-btn-text {
+		}
+		@media (max-width: 340px) {
+			#fc-app .fc-top .fc-btn-text {
 				display: none;
 			}
+		}
+		#fc-app .fc-cal-head {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 16px;
+			font-size: 18px;
+			font-weight: 600;
+		}
+		#fc-app .fc-cal-head button {
+			min-width: 56px;
+		}
+		#fc-app .fc-cal-grid {
+			display: grid;
+			grid-template-columns: repeat(7, minmax(0, 1fr));
+			gap: 6px;
+		}
+		#fc-app .fc-cal-wd {
+			padding: 4px 0;
+			font-size: 14px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-day {
+			aspect-ratio: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			border: 1px solid var(--fc-border);
+			border-radius: 8px;
+			font-size: 14px;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-day.fc-pad {
+			border: 0;
+		}
+		#fc-app .fc-day.fc-today {
+			border: 2px solid var(--fc-accent);
+		}
+		#fc-app .fc-day-count {
+			font-size: 18px;
+			font-weight: 600;
+			color: var(--fc-fg);
+		}
+		/* Shade days by views, relative to the busiest day of the month */
+		#fc-app .fc-day.fc-l1 {
+			background: color-mix(in srgb, var(--fc-accent) 15%, var(--fc-bg));
+		}
+		#fc-app .fc-day.fc-l2 {
+			background: color-mix(in srgb, var(--fc-accent) 35%, var(--fc-bg));
+		}
+		#fc-app .fc-day.fc-l3 {
+			background: color-mix(in srgb, var(--fc-accent) 60%, var(--fc-bg));
+		}
+		#fc-app .fc-day.fc-l4 {
+			background: var(--fc-accent);
+		}
+		#fc-app .fc-day.fc-l3,
+		#fc-app .fc-day.fc-l3 .fc-day-count,
+		#fc-app .fc-day.fc-l4,
+		#fc-app .fc-day.fc-l4 .fc-day-count {
+			color: #fff;
+		}
+		#fc-app .fc-cal-total {
+			margin-top: 16px;
+			font-size: 16px;
+			color: var(--fc-muted);
 		}
 		#fc-app .fc-settings {
 			margin-top: 24px;
 			text-align: left;
-			font-size: 14px;
+			font-size: 16px;
 			border: 1px solid var(--fc-border);
 			border-radius: 8px;
-			padding: 8px 12px;
+			padding: 12px 14px;
 		}
 		#fc-app .fc-settings summary {
 			cursor: pointer;
@@ -245,14 +510,14 @@
 		#fc-app .fc-settings-row {
 			display: flex;
 			gap: 8px;
-			margin-top: 8px;
+			margin-top: 12px;
 			flex-wrap: wrap;
 		}
 		#fc-app .fc-settings input {
 			flex: 1 1 240px;
 			min-width: 0;
-			padding: 8px 10px;
-			font-size: 14px;
+			padding: 12px 14px;
+			font-size: 16px;
 			border: 1px solid var(--fc-border);
 			border-radius: 8px;
 			background: var(--fc-bg);
@@ -261,7 +526,7 @@
 		#fc-app .fc-settings-error {
 			margin-top: 8px;
 			color: var(--fc-error);
-			font-size: 13px;
+			font-size: 15px;
 		}
 		#fc-app .fc-settings-error:empty {
 			display: none;
@@ -269,29 +534,51 @@
 		#fc-app .fc-settings-note {
 			margin-top: 8px;
 			color: var(--fc-muted);
-			font-size: 12px;
+			font-size: 14px;
 		}
 	</style>
 
 	<div class="fc-top">
 		<span id="fc-count"></span>
 		<span class="fc-top-right">
-			<button id="fc-dir" type="button"></button>
 			<button id="fc-list" type="button"></button>
-			<button id="fc-theme" type="button" title="Theme"></button>
+			<button id="fc-cal" type="button"></button>
 		</span>
 	</div>
 
 	<input id="fc-search" class="fc-search" type="search" placeholder="Search cards&hellip;" autocomplete="off" />
 
+	<button id="fc-dir" type="button" title="Swap the question and answer sides"></button>
+
+	<div class="fc-mode" id="fc-mode">
+		<button type="button" data-mode="flip">Flip cards</button>
+		<button type="button" data-mode="type">Type answer</button>
+		<button type="button" data-mode="quiz">Quiz</button>
+	</div>
+
 	<div id="fc-body"><div class="fc-msg">Loading cards&hellip;</div></div>
 
 	<div class="fc-controls" id="fc-controls">
 		<button id="fc-prev" type="button">&larr; Prev</button>
-		<button id="fc-flip" type="button" class="fc-primary">Flip</button>
 		<button id="fc-next" type="button">Next &rarr;</button>
+		<button id="fc-flip" type="button" class="fc-primary">Flip</button>
 		<button id="fc-shuffle" type="button">Shuffle</button>
+		<button id="fc-review" type="button" class="fc-wide"></button>
 	</div>
+
+	<details class="fc-settings" id="fc-rules">
+		<summary>How answers are checked</summary>
+		<ul class="fc-rules">
+			<li>Capital letters, extra spaces and punctuation (. ! ? : ") are ignored.</li>
+			<li>Umlauts and &szlig; must be exact: "uber" does not match "&uuml;ber", "strasse" does not match "Stra&szlig;e".</li>
+			<li>Articles count: "Hund" does not match "der Hund".</li>
+			<li>Text in brackets in the sheet is optional: "laufen" matches "laufen (ist gelaufen)".</li>
+			<li>When a sheet cell has several answers separated by /, ; or , any one of them is correct.</li>
+			<li>A blank answer is wrong.</li>
+			<li>In Type answer mode, if your answer is wrong, edit it and check again, or tap Show answer.</li>
+			<li>Use the &auml; &ouml; &uuml; &szlig; buttons if your keyboard does not have these letters.</li>
+		</ul>
+	</details>
 
 	<details class="fc-settings" id="fc-settings">
 		<summary>Google Sheet</summary>
@@ -309,15 +596,25 @@
 		</div>
 	</details>
 
+	<div class="fc-footer">
+		<button id="fc-theme" type="button"></button>
+	</div>
+
 	<script>
 		(function () {
 			var DEFAULT_URL =
 				"https://docs.google.com/spreadsheets/d/1PAR2CWXiN2aFeoJqJ9Eos3DwkoDvdqs83wTb8Ry3e3c/edit?usp=sharing";
 			var STORAGE_KEY = "learnde-flashcards-sheet";
 			var THEME_KEY = "learnde-flashcards-theme";
+			var MODE_KEY = "learnde-flashcards-mode";
+			var QUIZ_SIZE = 10;
+			var LETTERS = ["\u00e4", "\u00f6", "\u00fc", "\u00df"];
 			var THEMES = ["auto", "light", "dark"];
 			var THEME_ICONS = { auto: "\u25D0", light: "\u2600", dark: "\u263E" };
 			var THEME_NAMES = { auto: "Auto", light: "Light", dark: "Dark" };
+			var STATS_KEY = "learnde-flashcards-stats";
+			var REVIEW_KEY = "learnde-flashcards-review";
+			var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 			var cards = [];
 			var index = 0;
@@ -325,7 +622,18 @@
 			var labels = ["", ""];
 			var reversed = false;
 			var sheetCards = []; // cards in sheet order; `cards` is the shuffled deck
-			var listView = false;
+			var view = "cards"; // "cards", "list" or "calendar"
+			var reviewOnly = false; // study only the cards marked for review
+			// "flip" shows the other side, "type" checks a typed answer, "quiz" checks a set of cards at once
+			var answerMode = "flip";
+			var typed = ""; // answer typed for the current card
+			var result = null; // null until checked, then "right", "wrong" or "shown" (answer revealed)
+			var quiz = null; // { cards, answers, results }; results stay null until submitted
+			try {
+				var savedMode = localStorage.getItem(MODE_KEY);
+				if (savedMode === "type" || savedMode === "quiz") answerMode = savedMode;
+			} catch (e) {}
+			var calMonth = firstOfMonth(new Date());
 			var loadId = 0;
 
 			var $ = function (id) {
@@ -394,15 +702,194 @@
 					.replace(/[\u0300-\u036f]/g, "");
 			}
 
+			function firstOfMonth(d) {
+				return new Date(d.getFullYear(), d.getMonth(), 1);
+			}
+
+			// Local date as "YYYY-MM-DD".
+			function dateKey(d) {
+				var pad = function (n) {
+					return (n < 10 ? "0" : "") + n;
+				};
+				return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+			}
+
+			function cardKey(card) {
+				return card[0] + "\t" + card[1];
+			}
+
+			// Keys of the cards marked for review.
+			function getReviewKeys() {
+				try {
+					return JSON.parse(localStorage.getItem(REVIEW_KEY)) || [];
+				} catch (e) {
+					return [];
+				}
+			}
+
+			function toggleReview(card) {
+				var keys = getReviewKeys();
+				var i = keys.indexOf(cardKey(card));
+				if (i >= 0) keys.splice(i, 1);
+				else keys.push(cardKey(card));
+				try {
+					localStorage.setItem(REVIEW_KEY, JSON.stringify(keys));
+				} catch (e) {}
+			}
+
+			// Deck to study: every card, or only the cards marked for review.
+			function buildDeck() {
+				var keys = getReviewKeys();
+				cards = sheetCards.filter(function (card) {
+					return !reviewOnly || keys.indexOf(cardKey(card)) >= 0;
+				});
+				shuffle(cards);
+				index = 0;
+				flipped = false;
+				typed = "";
+				result = null;
+				quiz = null;
+			}
+
+			// { counts: { "YYYY-MM-DD": n }, day: today's key, seen: cards counted today }
+			function loadStats() {
+				try {
+					var stats = JSON.parse(localStorage.getItem(STATS_KEY));
+					if (stats && stats.counts) return stats;
+				} catch (e) {}
+				return { counts: {}, day: "", seen: [] };
+			}
+
+			// Count each distinct card once per day.
+			function recordView(card) {
+				var stats = loadStats();
+				var today = dateKey(new Date());
+				var key = cardKey(card);
+				if (stats.day !== today) {
+					stats.day = today;
+					stats.seen = [];
+				}
+				if (stats.seen.indexOf(key) >= 0) return;
+				stats.seen.push(key);
+				stats.counts[today] = stats.seen.length;
+				try {
+					localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+				} catch (e) {}
+			}
+
+			function shiftMonth(step) {
+				var next = new Date(calMonth.getFullYear(), calMonth.getMonth() + step, 1);
+				if (next > new Date()) return;
+				calMonth = next;
+				render();
+			}
+
+			// Month grid (Monday first) with the number of cards viewed on each day.
+			function renderCalendar() {
+				var counts = loadStats().counts;
+				var year = calMonth.getFullYear();
+				var month = calMonth.getMonth();
+				var daysInMonth = new Date(year, month + 1, 0).getDate();
+				var lead = (calMonth.getDay() + 6) % 7;
+				var today = dateKey(new Date());
+				var max = 0;
+				var total = 0;
+				var activeDays = 0;
+				for (var d = 1; d <= daysInMonth; d++) {
+					var n = counts[dateKey(new Date(year, month, d))] || 0;
+					max = Math.max(max, n);
+					total += n;
+					if (n) activeDays++;
+				}
+
+				var cells = WEEKDAYS.map(function (w) {
+					return '<div class="fc-cal-wd">' + w + "</div>";
+				});
+				for (var i = 0; i < lead; i++) cells.push('<div class="fc-day fc-pad"></div>');
+				for (d = 1; d <= daysInMonth; d++) {
+					var key = dateKey(new Date(year, month, d));
+					var count = counts[key] || 0;
+					var level = count ? Math.ceil((count / max) * 4) : 0;
+					cells.push(
+						'<div class="fc-day' + (level ? " fc-l" + level : "") + (key === today ? " fc-today" : "") +
+						'" title="' + count + (count === 1 ? " card" : " cards") + '">' +
+						"<span>" + d + "</span>" +
+						'<span class="fc-day-count">' + (count || "") + "</span>" +
+						"</div>"
+					);
+				}
+
+				$("fc-count").textContent = "Cards per day";
+				$("fc-body").innerHTML =
+					'<div class="fc-cal-head">' +
+					'<button type="button" id="fc-cal-prev" title="Previous month">&larr;</button>' +
+					"<span>" + calMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" }) + "</span>" +
+					'<button type="button" id="fc-cal-next" title="Next month"' +
+					(firstOfMonth(new Date()) <= calMonth ? " disabled" : "") + ">&rarr;</button>" +
+					"</div>" +
+					'<div class="fc-cal-grid">' + cells.join("") + "</div>" +
+					'<div class="fc-cal-total">' + total + (total === 1 ? " card" : " cards") + " on " +
+					activeDays + (activeDays === 1 ? " day" : " days") + "</div>";
+			}
+
+			// Lowercase, drop text in brackets and punctuation, collapse spaces.
+			function simplify(s) {
+				return s
+					.toLowerCase()
+					.replace(/\([^)]*\)/g, " ")
+					.replace(/[.!?:"]/g, " ")
+					.replace(/\s+/g, " ")
+					.trim();
+			}
+
+			// A cell can hold alternatives separated by "/", ";" or ","; text in brackets is dropped first.
+			function checkAnswer(given, answer) {
+				answer = answer.replace(/\([^)]*\)/g, " ");
+				var alternatives = answer.split(/[\/;,]/).concat(answer).map(simplify);
+				given = simplify(given);
+				return given && alternatives.indexOf(given) >= 0 ? "right" : "wrong";
+			}
+
+			// The card is finished once it is answered correctly or the answer is shown.
+			function answered() {
+				return result === "right" || result === "shown";
+			}
+
+			function check() {
+				if (!typed.trim()) {
+					$("fc-input").focus();
+					return;
+				}
+				result = checkAnswer(typed, cards[index][reversed ? 0 : 1]);
+				render();
+				if (result === "wrong") $("fc-input").focus();
+			}
+
+			function renderVerdict(answer) {
+				if (result === "right") return '<div class="fc-verdict fc-right">\u2713 Correct</div>';
+				if (result === "shown") {
+					return '<div class="fc-verdict"><span class="fc-correct">Answer: <b>' + escapeHTML(answer) + "</b></span></div>";
+				}
+				if (result === "wrong") {
+					return (
+						'<div class="fc-verdict fc-wrong">\u2717 Not quite. Edit your answer and check again.' +
+						'<br><button type="button" id="fc-show">Show answer</button></div>'
+					);
+				}
+				return "";
+			}
+
 			// Table of cards in sheet order; an empty query lists every card.
 			function renderList(query) {
 				var matches = [];
+				var keys = getReviewKeys();
 				sheetCards.forEach(function (card) {
-					if (normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(cards.indexOf(card));
+					var i = cards.indexOf(card);
+					if (i >= 0 && normalize(card[0] + "\n" + card[1]).indexOf(query) >= 0) matches.push(i);
 				});
 				$("fc-count").textContent = query
 					? matches.length + (matches.length === 1 ? " match" : " matches")
-					: "All " + matches.length + " cards";
+					: (reviewOnly ? "" : "All ") + matches.length + (reviewOnly ? " marked" : " cards");
 				if (!matches.length) {
 					$("fc-body").innerHTML = '<div class="fc-msg">No cards match.</div>';
 					return;
@@ -414,7 +901,9 @@
 						.map(function (i) {
 							return (
 								'<button type="button" class="fc-result" data-i="' + i + '">' +
-								"<span>" + escapeHTML(cards[i][0]) + "</span><span>" + escapeHTML(cards[i][1]) + "</span>" +
+								"<span>" +
+								(keys.indexOf(cardKey(cards[i])) >= 0 ? '<span class="fc-star">\u2605</span> ' : "") +
+								escapeHTML(cards[i][0]) + "</span><span>" + escapeHTML(cards[i][1]) + "</span>" +
 								"</button>"
 							);
 						})
@@ -428,41 +917,241 @@
 				["fc-prev", "fc-flip", "fc-next", "fc-shuffle"].forEach(function (id) {
 					$(id).disabled = empty;
 				});
-				var showList = !empty && (query || listView);
-				$("fc-controls").style.display = showList ? "none" : "";
+				var showCal = view === "calendar";
+				var showList = !empty && !showCal && (query || view === "list");
+				$("fc-controls").style.display = showList || showCal ? "none" : "";
+				$("fc-mode").style.display = showList || showCal || empty ? "none" : "";
+				$("fc-rules").style.display = showList || showCal || empty || answerMode === "flip" ? "none" : "";
+				// In a quiz only the review toggle applies.
+				["fc-prev", "fc-next", "fc-flip", "fc-shuffle"].forEach(function (id) {
+					$(id).style.display = answerMode === "quiz" ? "none" : "";
+				});
+				Array.prototype.forEach.call($("fc-mode").children, function (b) {
+					b.classList.toggle("fc-on", b.dataset.mode === answerMode);
+				});
+				$("fc-flip").textContent = answerMode === "flip" ? "Flip" : answered() ? "Next card" : "Check";
 				$("fc-list").disabled = empty;
-				$("fc-list").innerHTML = listView
+				var reviewCount = getReviewKeys().filter(function (key) {
+					return sheetCards.some(function (card) {
+						return cardKey(card) === key;
+					});
+				}).length;
+				$("fc-review").disabled = !sheetCards.length;
+				$("fc-review").classList.toggle("fc-active", reviewOnly);
+				$("fc-review").textContent = reviewOnly
+					? "Study all cards"
+					: "\u2605 Review marked cards (" + reviewCount + ")";
+				$("fc-list").innerHTML =
+					view === "list" ? '▭<span class="fc-btn-text"> Cards</span>' : '☰<span class="fc-btn-text"> List</span>';
+				$("fc-list").title = view === "list" ? "Back to cards" : "Show all cards";
+				$("fc-cal").innerHTML = showCal
 					? '▭<span class="fc-btn-text"> Cards</span>'
-					: '☰<span class="fc-btn-text"> List</span>';
-				$("fc-list").title = listView ? "Back to cards" : "Show all cards";
-				$("fc-dir").textContent = empty
-					? ""
-					: reversed
-						? labels[1] + " \u2192 " + labels[0]
-						: labels[0] + " \u2192 " + labels[1];
-				$("fc-dir").style.visibility = empty ? "hidden" : "";
+					: '▦<span class="fc-btn-text"> Calendar</span>';
+				$("fc-cal").title = showCal ? "Back to cards" : "Cards viewed per day";
+				$("fc-dir").textContent =
+					"\u21c4 " + (reversed ? labels[1] + " \u2192 " + labels[0] : labels[0] + " \u2192 " + labels[1]);
+				$("fc-dir").style.display = empty || showCal ? "none" : "";
+				if (showCal) {
+					renderCalendar();
+					return;
+				}
 				if (empty) {
 					$("fc-count").textContent = "";
-					$("fc-body").innerHTML = '<div class="fc-msg">No cards found in the sheet.</div>';
+					$("fc-body").innerHTML = reviewOnly
+						? '<div class="fc-msg">No cards marked for review. Tap \u2606 Mark for review on a card you could not answer.</div>'
+						: '<div class="fc-msg">No cards found in the sheet.</div>';
 					return;
 				}
 				if (showList) {
 					renderList(query);
 					return;
 				}
+				if (answerMode === "quiz") {
+					renderQuiz();
+					return;
+				}
 				var card = cards[index];
+				var typing = answerMode === "type";
 				var side = reversed !== flipped ? 1 : 0;
-				$("fc-count").textContent = "Card " + (index + 1) + " / " + cards.length;
+				var refocus = typing && document.activeElement && document.activeElement.id === "fc-input";
+				recordView(card);
+				var saved = getReviewKeys().indexOf(cardKey(card)) >= 0;
+				$("fc-count").textContent = (reviewOnly ? "Review " : "Card ") + (index + 1) + " / " + cards.length;
 				$("fc-body").innerHTML =
 					'<div class="fc-card' + (flipped ? " fc-back" : "") + '" id="fc-card">' +
 					'<span class="fc-label">' + escapeHTML(labels[side]) + "</span>" +
+					'<button type="button" id="fc-save" class="fc-save' + (saved ? " fc-saved" : "") + '" aria-pressed="' + saved +
+					'" title="' + (saved ? "Remove from review" : "Mark this card to review later") + '">' +
+					(saved ? "\u2605 Marked for review" : "\u2606 Mark for review") + "</button>" +
 					'<div class="fc-text">' + escapeHTML(card[side]) + "</div>" +
-					'<div class="fc-hint">' + (flipped ? "" : "Tap card to flip") + "</div>" +
-					"</div>";
-				$("fc-card").onclick = flip;
+					(typing ? "" : '<div class="fc-hint">' + (flipped ? "" : "Tap card to flip") + "</div>") +
+					"</div>" +
+					(typing ? renderTyping(card) : "");
+				if (!typing) $("fc-card").onclick = flip;
+				if (typing) bindTyping(refocus);
+				$("fc-save").onclick = function (e) {
+					e.stopPropagation();
+					toggleReview(card);
+					render();
+				};
 			}
 
+			function renderTyping(card) {
+				var answerSide = reversed ? 0 : 1;
+				return (
+					'<input id="fc-input" class="fc-input' + (result ? " fc-" + result : "") + '" type="text"' +
+					' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+					(answered() ? " readonly" : "") +
+					' placeholder="Type the ' + escapeHTML(labels[answerSide]) + '&hellip;" />' +
+					(answered() ? "" : renderLetters()) +
+					renderVerdict(card[answerSide])
+				);
+			}
+
+			function bindTyping(refocus) {
+				var input = $("fc-input");
+				input.value = typed;
+				input.oninput = function () {
+					typed = input.value;
+					input.classList.remove("fc-wrong");
+				};
+				if ($("fc-show")) {
+					$("fc-show").onclick = function () {
+						result = "shown";
+						render();
+					};
+				}
+				input.onkeydown = function (e) {
+					if (e.key === "Enter") {
+						e.preventDefault();
+						flip();
+					}
+				};
+				bindLetters(function () {
+					return input;
+				});
+				if (refocus) input.focus();
+			}
+
+			function renderLetters() {
+				return (
+					'<div class="fc-letters">' +
+					LETTERS.map(function (l) {
+						return '<button type="button" data-letter="' + l + '">' + l + "</button>";
+					}).join("") +
+					"</div>"
+				);
+			}
+
+			// Letter buttons insert at the cursor of getInput(); mousedown keeps focus in the input.
+			function bindLetters(getInput) {
+				Array.prototype.forEach.call(document.querySelectorAll("#fc-app .fc-letters button"), function (b) {
+					b.onmousedown = function (e) {
+						e.preventDefault();
+					};
+					b.onclick = function () {
+						var input = getInput();
+						input.setRangeText(b.dataset.letter, input.selectionStart, input.selectionEnd, "end");
+						input.dispatchEvent(new Event("input"));
+						input.focus();
+					};
+				});
+			}
+
+			function newQuiz() {
+				var pool = cards.slice();
+				shuffle(pool);
+				quiz = { cards: pool.slice(0, QUIZ_SIZE), answers: [], results: null };
+			}
+
+			// Quiz: a random set of cards, all answered on one page and submitted together.
+			function renderQuiz() {
+				if (!quiz) newQuiz();
+				var answerSide = reversed ? 0 : 1;
+				var done = !!quiz.results;
+				var total = quiz.cards.length;
+				var score = done
+					? quiz.results.filter(function (r) {
+							return r === "right";
+						}).length
+					: 0;
+				$("fc-count").textContent = done ? "Score " + score + " / " + total : "Quiz \u00b7 " + total + " cards";
+				$("fc-body").innerHTML =
+					'<form id="fc-quiz" class="fc-quiz" novalidate>' +
+					(done ? '<div class="fc-score">' + score + " / " + total + " correct</div>" : "") +
+					"<ol>" +
+					quiz.cards
+						.map(function (card, i) {
+							var r = done ? quiz.results[i] : "";
+							return (
+								'<li class="fc-q' + (r ? " fc-" + r : "") + '">' +
+								(r ? '<span class="fc-q-mark">' + (r === "right" ? "\u2713" : "\u2717") + "</span>" : "") +
+								'<div class="fc-q-prompt"><span class="fc-q-num">' + (i + 1) + ".</span> " +
+								escapeHTML(card[1 - answerSide]) + "</div>" +
+								'<input class="fc-input" data-q="' + i + '" type="text"' +
+								' autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' +
+								(done ? " readonly" : "") +
+								' placeholder="' + escapeHTML(labels[answerSide]) + '&hellip;" />' +
+								(r === "wrong" ? '<div class="fc-q-answer">Answer: <b>' + escapeHTML(card[answerSide]) + "</b></div>" : "") +
+								"</li>"
+							);
+						})
+						.join("") +
+					"</ol>" +
+					(done ? "" : renderLetters()) +
+					'<button type="submit" class="fc-primary fc-quiz-go">' + (done ? "New quiz" : "Submit answers") + "</button>" +
+					"</form>";
+				bindQuiz(done);
+			}
+
+			function bindQuiz(done) {
+				var inputs = document.querySelectorAll("#fc-quiz .fc-input");
+				var last = inputs[0];
+				Array.prototype.forEach.call(inputs, function (input, i) {
+					input.value = quiz.answers[i] || "";
+					input.onfocus = function () {
+						last = input;
+					};
+					input.oninput = function () {
+						quiz.answers[i] = input.value;
+					};
+					// Enter moves to the next answer; on the last one it submits.
+					input.onkeydown = function (e) {
+						if (e.key !== "Enter" || done) return;
+						e.preventDefault();
+						if (inputs[i + 1]) inputs[i + 1].focus();
+						else submitQuiz();
+					};
+				});
+				bindLetters(function () {
+					return last;
+				});
+				$("fc-quiz").onsubmit = function (e) {
+					e.preventDefault();
+					if (!done) return submitQuiz();
+					newQuiz();
+					render();
+					$("fc-app").scrollIntoView();
+				};
+			}
+
+			function submitQuiz() {
+				var answerSide = reversed ? 0 : 1;
+				quiz.results = quiz.cards.map(function (card, i) {
+					return checkAnswer(quiz.answers[i] || "", card[answerSide]);
+				});
+				quiz.cards.forEach(recordView);
+				render();
+				$("fc-app").scrollIntoView();
+			}
+
+			// In type mode the main button checks the answer until the card is answered, then moves on.
 			function flip() {
+				if (answerMode === "type") {
+					if (answered()) go(1);
+					else check();
+					return;
+				}
 				flipped = !flipped;
 				render();
 			}
@@ -470,10 +1159,26 @@
 			function go(step) {
 				index = (index + step + cards.length) % cards.length;
 				flipped = false;
+				typed = "";
+				result = null;
 				render();
 			}
 
 			$("fc-flip").onclick = flip;
+			$("fc-mode").onclick = function (e) {
+				var b = e.target.closest("button");
+				if (!b || b.dataset.mode === answerMode) return;
+				answerMode = b.dataset.mode;
+				flipped = false;
+				typed = "";
+				result = null;
+				try {
+					if (answerMode === "flip") localStorage.removeItem(MODE_KEY);
+					else localStorage.setItem(MODE_KEY, answerMode);
+				} catch (e) {}
+				render();
+				if (answerMode === "type") $("fc-input").focus();
+			};
 			$("fc-prev").onclick = function () {
 				go(-1);
 			};
@@ -484,19 +1189,37 @@
 				shuffle(cards);
 				index = 0;
 				flipped = false;
+				typed = "";
+				result = null;
+				render();
+			};
+			$("fc-review").onclick = function () {
+				reviewOnly = !reviewOnly;
+				buildDeck();
 				render();
 			};
 			$("fc-dir").onclick = function () {
 				reversed = !reversed;
 				flipped = false;
+				typed = "";
+				result = null;
+				quiz = null;
 				render();
 			};
 
 			$("fc-list").onclick = function () {
-				listView = !listView;
+				view = view === "list" ? "cards" : "list";
 				render();
 			};
-			$("fc-search").oninput = render;
+			$("fc-cal").onclick = function () {
+				view = view === "calendar" ? "cards" : "calendar";
+				calMonth = firstOfMonth(new Date());
+				render();
+			};
+			$("fc-search").oninput = function () {
+				if (view === "calendar") view = "cards";
+				render();
+			};
 			$("fc-search").onkeydown = function (e) {
 				if (e.key === "Escape") {
 					this.value = "";
@@ -506,29 +1229,47 @@
 			};
 			// Clicking a row in the list opens that card.
 			$("fc-body").addEventListener("click", function (e) {
-				var result = e.target.closest(".fc-result");
-				if (!result) return;
-				index = Number(result.dataset.i);
+				if (e.target.closest("#fc-cal-prev")) return shiftMonth(-1);
+				if (e.target.closest("#fc-cal-next")) return shiftMonth(1);
+				var row = e.target.closest(".fc-result");
+				if (!row) return;
+				index = Number(row.dataset.i);
 				flipped = false;
-				listView = false;
+				typed = "";
+				result = null;
+				view = "cards";
 				$("fc-search").value = "";
 				render();
 			});
 
 			document.addEventListener("keydown", function (e) {
-				if (!cards.length || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+				if (/INPUT|TEXTAREA/.test(e.target.tagName)) return;
+				if (view === "calendar") {
+					if (e.key === "Escape") {
+						view = "cards";
+						render();
+					} else if (e.key === "ArrowLeft") shiftMonth(-1);
+					else if (e.key === "ArrowRight") shiftMonth(1);
+					return;
+				}
+				if (!cards.length) return;
 				if (e.key === "/") {
 					e.preventDefault();
 					$("fc-search").focus();
-				} else if (listView || $("fc-search").value.trim()) {
+				} else if (view === "list" || $("fc-search").value.trim()) {
 					if (e.key === "Escape") {
-						listView = false;
+						view = "cards";
 						$("fc-search").value = "";
 						render();
 					}
+				} else if (answerMode === "quiz") {
+					return;
 				} else if (e.key === "ArrowRight") go(1);
 				else if (e.key === "ArrowLeft") go(-1);
-				else if (e.key === " " || e.key === "Enter") {
+				else if (e.key === "s") {
+					toggleReview(cards[index]);
+					render();
+				} else if (e.key === " " || e.key === "Enter") {
 					e.preventDefault();
 					flip();
 				}
@@ -609,8 +1350,7 @@
 			function applyTheme() {
 				var dark = theme === "dark" || (theme === "auto" && systemDark && systemDark.matches);
 				document.documentElement.classList.toggle("fc-dark", !!dark);
-				$("fc-theme").innerHTML =
-					THEME_ICONS[theme] + '<span class="fc-btn-text"> ' + THEME_NAMES[theme] + "</span>";
+				$("fc-theme").textContent = THEME_ICONS[theme] + " Theme: " + THEME_NAMES[theme];
 				$("fc-theme").title = "Theme: " + THEME_NAMES[theme];
 			}
 
@@ -635,7 +1375,11 @@
 				sheetCards = [];
 				index = 0;
 				flipped = false;
-				["fc-prev", "fc-flip", "fc-next", "fc-shuffle", "fc-list"].forEach(function (id) {
+				typed = "";
+				result = null;
+				reviewOnly = false;
+				quiz = null;
+				["fc-prev", "fc-flip", "fc-next", "fc-shuffle", "fc-list", "fc-review"].forEach(function (id) {
 					$(id).disabled = true;
 				});
 				$("fc-count").textContent = "";
