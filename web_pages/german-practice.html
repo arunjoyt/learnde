@@ -1066,6 +1066,7 @@
 			var WORDS_KEY = "learnde-flashcards-words"; // { cardKey: { h: last results "1"/"0", c: right, w: wrong } }
 			var ARTICLE_STATS_KEY = "learnde-flashcards-articles"; // { correct article: { picked article: count } }
 			var NUMBER_STATS_KEY = "learnde-flashcards-numbers"; // { checked, swaps, recent: ["47 \u2192 74"] }
+			var DEALT_KEY = "learnde-flashcards-dealt"; // { d: day, keys: cards dealt today since the last start-over }
 			var SCORED_MODES = ["quiz", "article", "number"];
 			var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
@@ -1321,7 +1322,7 @@
 				});
 			}
 
-			// Pick `roundSize` random cards from the deck. Number mode makes up random numbers instead.
+			// Deal `roundSize` cards from the deck (see dealCards). Number mode makes up random numbers instead.
 			// `list`, when given, is the exact set of cards to practise.
 			function newRound(list) {
 				customCards = list || null;
@@ -1335,15 +1336,36 @@
 					speakNext = true;
 				} else {
 					deck = eligibleCards();
-					var pool = deck.slice();
-					shuffle(pool);
-					cards = roundSize ? pool.slice(0, roundSize) : pool;
+					cards = dealCards(deck, roundSize || deck.length);
 				}
 				index = 0;
 				reached = 0;
 				log = [];
 				quiz = answerMode === "quiz" ? { answers: [], results: null } : null;
 				loadCard();
+			}
+
+			// Pick `count` random cards from `pool` that were not dealt yet today. When every card
+			// was dealt, start over, so a card comes back only after all the others.
+			function dealCards(pool, count) {
+				var today = dateKey(new Date());
+				var dealt = readJSON(DEALT_KEY, {});
+				var keys = dealt.d === today && Array.isArray(dealt.keys) ? dealt.keys : [];
+				var fresh = pool.filter(function (card) {
+					return keys.indexOf(cardKey(card)) < 0;
+				});
+				shuffle(fresh);
+				var picked = fresh.slice(0, count);
+				if (picked.length < count) {
+					keys = [];
+					var rest = pool.filter(function (card) {
+						return picked.indexOf(card) < 0;
+					});
+					shuffle(rest);
+					picked = picked.concat(rest.slice(0, count - picked.length));
+				}
+				writeJSON(DEALT_KEY, { d: today, keys: keys.concat(picked.map(cardKey)) });
+				return picked;
 			}
 
 			function saveCard() {
