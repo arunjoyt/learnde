@@ -908,7 +908,103 @@
 			padding: 40px 0;
 			color: var(--fc-muted);
 		}
+
+		/* Alphabet: the grid and the picked letter's details fit on one phone screen */
+		#fc-app .fc-abc-view {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 8px;
+		}
+		#fc-app .fc-abc-view button {
+			flex: 1;
+			min-height: 36px;
+			padding: 6px 4px;
+			font-size: 15px;
+		}
+		#fc-app .fc-abc-view button.fc-on,
+		#fc-app button.fc-abc-tile.fc-on {
+			background: var(--fc-accent);
+			border-color: var(--fc-accent);
+			color: #fff;
+		}
+		#fc-app .fc-abc {
+			display: grid;
+			grid-template-columns: repeat(6, minmax(0, 1fr));
+			gap: 6px;
+		}
+		#fc-app .fc-abc.fc-abc-groups {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+		#fc-app button.fc-abc-tile {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			min-width: 0;
+			min-height: 0;
+			padding: 4px 2px;
+			background: var(--fc-card);
+		}
+		#fc-app .fc-abc-big {
+			font-size: 18px;
+			font-weight: 700;
+			line-height: 1.2;
+			white-space: nowrap;
+		}
+		#fc-app .fc-abc-sub {
+			max-width: 100%;
+			overflow: hidden;
+			font-size: 11px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-abc-tile.fc-on .fc-abc-sub {
+			color: #fff;
+		}
+		#fc-app .fc-abc-detail {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			min-height: 88px;
+			margin-top: 8px;
+			padding: 8px 14px;
+			border: 1px solid var(--fc-border);
+			border-radius: 12px;
+			text-align: left;
+		}
+		#fc-app .fc-abc-detail .fc-abc-big {
+			flex: none;
+			font-size: 32px;
+		}
+		#fc-app .fc-abc-name {
+			font-size: 18px;
+		}
+		#fc-app .fc-abc-ipa,
+		#fc-app .fc-abc-note {
+			color: var(--fc-muted);
+		}
+		#fc-app .fc-abc-note {
+			font-size: 15px;
+		}
+		#fc-app .fc-abc-note b {
+			color: var(--fc-fg);
+			font-weight: 600;
+		}
 		@media (max-width: 480px) {
+			/* Four tabs and the theme button fit on a phone */
+			#fc-app .fc-tabs {
+				gap: 2px;
+			}
+			#fc-app .fc-tabs button {
+				flex: 1 1 auto;
+				padding: 10px 4px;
+				font-size: 15px;
+			}
+			#fc-app button.fc-theme {
+				min-width: 44px;
+				padding: 8px;
+				font-size: 18px;
+			}
 			#fc-app .fc-text {
 				font-size: 28px;
 			}
@@ -919,6 +1015,12 @@
 				min-height: 150px;
 			}
 		}
+		@media (max-width: 374px) {
+			#fc-app .fc-tabs button {
+				padding: 10px 2px;
+				font-size: 13px;
+			}
+		}
 	</style>
 
 	<div class="fc-tabbar">
@@ -926,6 +1028,7 @@
 			<button type="button" role="tab" data-tab="practice">Practice</button>
 			<button type="button" role="tab" data-tab="words">Words</button>
 			<button type="button" role="tab" data-tab="progress">Progress</button>
+			<button type="button" role="tab" data-tab="alphabet">Alphabet</button>
 		</div>
 		<button id="fc-theme" type="button" class="fc-theme"></button>
 	</div>
@@ -1029,6 +1132,15 @@
 		<div id="fc-list"></div>
 	</section>
 
+	<section id="fc-alphabet">
+		<div class="fc-abc-view" id="fc-abc-view">
+			<button type="button" data-view="letters">Letters</button>
+			<button type="button" data-view="groups" title="Letters that make one sound together">Letter groups</button>
+		</div>
+		<div class="fc-abc" id="fc-abc-grid"></div>
+		<div class="fc-abc-detail" id="fc-abc-detail"></div>
+	</section>
+
 	<section id="fc-progress">
 		<div id="fc-stats"></div>
 		<div class="fc-panel">
@@ -1069,8 +1181,56 @@
 			var DEALT_KEY = "learnde-flashcards-dealt"; // { d: day, keys: cards dealt today since the last start-over }
 			var SCORED_MODES = ["quiz", "article", "number"];
 			var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+			// [letter, name as spoken, IPA of the name, how it sounds in words, example word]
+			var ALPHABET = [
+				["A a", "ah", "aː", "", "Apfel"],
+				["B b", "beh", "beː", "", "Ball"],
+				["C c", "tseh", "tseː", "k or ts, mostly in borrowed words", "Computer"],
+				["D d", "deh", "deː", "t at the end of a word", "Dorf"],
+				["E e", "eh", "eː", "", "Esel"],
+				["F f", "eff", "ɛf", "", "Fisch"],
+				["G g", "geh", "ɡeː", "always hard, as in go", "Garten"],
+				["H h", "hah", "haː", "silent after a vowel: gehen", "Haus"],
+				["I i", "ih", "iː", "", "Igel"],
+				["J j", "jott", "jɔt", "like English y", "Junge"],
+				["K k", "kah", "kaː", "", "Katze"],
+				["L l", "ell", "ɛl", "", "Lampe"],
+				["M m", "emm", "ɛm", "", "Maus"],
+				["N n", "enn", "ɛn", "", "Nase"],
+				["O o", "oh", "oː", "", "Ofen"],
+				["P p", "peh", "peː", "", "Papier"],
+				["Q q", "kuh", "kuː", "qu sounds like kv", "Qualle"],
+				["R r", "err", "ɛʁ", "in the throat, like a soft gargle", "Rose"],
+				["S s", "ess", "ɛs", "z before a vowel, s elsewhere", "Sonne"],
+				["T t", "teh", "teː", "", "Tisch"],
+				["U u", "uh", "uː", "", "Uhr"],
+				["V v", "fau", "faʊ", "usually f", "Vogel"],
+				["W w", "weh", "veː", "like English v", "Wasser"],
+				["X x", "iks", "ɪks", "", "Xylofon"],
+				["Y y", "ypsilon", "ˈʏpsilɔn", "like ü", "Typ"],
+				["Z z", "tsett", "tsɛt", "ts, as in cats", "Zebra"],
+				["Ä ä", "äh", "ɛː", "like e in bed", "Käse"],
+				["Ö ö", "öh", "øː", "say e with rounded lips", "Öl"],
+				["Ü ü", "üh", "yː", "say i with rounded lips", "Tür"],
+				["ß", "eszett", "ɛsˈtsɛt", "a sharp s", "Straße"],
+			];
+			// [letters, sound in IPA, how it sounds, example word]
+			var LETTER_GROUPS = [
+				["ch", "x", "after a, o, u: rough, at the back of the throat", "Buch"],
+				["ch", "ç", "after e, i, ä, ö, ü: soft, like a whispered h", "ich"],
+				["sch", "ʃ", "like English sh", "Schule"],
+				["sp / st", "ʃp / ʃt", "shp / sht at the start of a word", "Stadt"],
+				["tsch", "tʃ", "like English ch", "Deutsch"],
+				["pf", "pf", "p and f together", "Pferd"],
+				["chs", "ks", "like x", "sechs"],
+				["-ig", "ɪç", "at the end of a word, like ich", "König"],
+				["ei", "aɪ", "like English eye", "mein"],
+				["ie", "iː", "like English ee", "Liebe"],
+				["eu / äu", "ɔʏ", "like English oy", "heute"],
+				["au", "aʊ", "like English ow in how", "Haus"],
+			];
 
-			var tab = "practice"; // "practice", "words" or "progress"
+			var tab = "practice"; // "practice", "words", "progress" or "alphabet"
 			var stage = "setup"; // practice tab: "setup", "session" or "summary"
 			var loadState = "loading"; // "loading", "ready", or the error message
 			var deck = []; // cards to study: the whole sheet, the marked cards, or only nouns in article mode
@@ -1099,6 +1259,8 @@
 			var numMin = 1;
 			var numMax = 100;
 			var speakNext = false; // read the number aloud on the next render
+			var abcView = "letters"; // alphabet tab: "letters" or "groups"
+			var abcPick = 0; // letter or group whose details show in the alphabet tab
 			try {
 				var savedRange = JSON.parse(localStorage.getItem(RANGE_KEY));
 				if (savedRange) {
@@ -1579,7 +1741,9 @@
 				$("fc-practice").hidden = tab !== "practice";
 				$("fc-words").hidden = tab !== "words";
 				$("fc-progress").hidden = tab !== "progress";
+				$("fc-alphabet").hidden = tab !== "alphabet";
 				if (tab === "words") return renderWords();
+				if (tab === "alphabet") return;
 				if (tab === "progress") {
 					renderStats();
 					return renderCalendar();
@@ -2002,6 +2166,37 @@
 				};
 			}
 
+			// Alphabet tab: a grid of the letters or the letter groups, with the picked one's details below.
+			function renderAlphabet() {
+				var groups = abcView === "groups";
+				var list = groups
+					? LETTER_GROUPS.map(function (g) {
+							return [g[0], "", g[1], g[2], g[3]];
+						})
+					: ALPHABET;
+				each("#fc-abc-view [data-view]", function (b) {
+					b.classList.toggle("fc-on", b.dataset.view === abcView);
+				});
+				$("fc-abc-grid").classList.toggle("fc-abc-groups", groups);
+				$("fc-abc-grid").innerHTML = list
+					.map(function (entry, i) {
+						return (
+							'<button type="button" class="fc-abc-tile' + (i === abcPick ? " fc-on" : "") + '" data-i="' + i + '">' +
+							'<span class="fc-abc-big">' + escapeHTML(entry[0]) + "</span>" +
+							'<span class="fc-abc-sub">' + escapeHTML(entry[1] || "[" + entry[2] + "]") + "</span>" +
+							"</button>"
+						);
+					})
+					.join("");
+				var picked = list[abcPick];
+				$("fc-abc-detail").innerHTML =
+					'<span class="fc-abc-big">' + escapeHTML(picked[0]) + "</span><div>" +
+					'<div class="fc-abc-name">' + (picked[1] ? escapeHTML(picked[1]) + " " : "") +
+					'<span class="fc-abc-ipa">[' + escapeHTML(picked[2]) + "]</span></div>" +
+					(picked[3] ? '<div class="fc-abc-note">' + escapeHTML(picked[3]) + "</div>" : "") +
+					'<div class="fc-abc-note">e.g. <b>' + escapeHTML(picked[4]) + "</b></div></div>";
+			}
+
 			// Words tab: the whole sheet; tapping a word marks or unmarks it for review.
 			function renderWords() {
 				if (loadState !== "ready") {
@@ -2380,6 +2575,19 @@
 
 			// ---- Events ----
 
+			$("fc-abc-view").onclick = function (e) {
+				var b = e.target.closest("[data-view]");
+				if (!b) return;
+				abcView = b.dataset.view;
+				abcPick = 0;
+				renderAlphabet();
+			};
+			$("fc-abc-grid").onclick = function (e) {
+				var b = e.target.closest("[data-i]");
+				if (!b) return;
+				abcPick = Number(b.dataset.i);
+				renderAlphabet();
+			};
 			$("fc-tabs").onclick = function (e) {
 				var b = e.target.closest("[data-tab]");
 				if (!b) return;
@@ -2589,6 +2797,7 @@
 			};
 			if (systemDark && systemDark.addEventListener) systemDark.addEventListener("change", applyTheme);
 			applyTheme();
+			renderAlphabet();
 
 			var initial = getSaved() || DEFAULT_URL;
 			$("fc-url").value = initial;
